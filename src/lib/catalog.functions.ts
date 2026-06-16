@@ -1,14 +1,22 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 import { parseYml, slugify } from "./yml-parser";
 
 // ---------- PUBLIC READ ----------
 
 function publicClient() {
-  // Use admin client server-side for public reads (RLS is permissive for SELECT on these tables).
-  // Loaded inside handlers only.
-  return import("@/integrations/supabase/client.server").then((m) => m.supabaseAdmin);
+  return createClient<Database>(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_PUBLISHABLE_KEY!,
+    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+  );
+}
+
+async function withPublic<T>(fn: (sb: ReturnType<typeof publicClient>) => Promise<T>): Promise<T> {
+  return fn(publicClient());
 }
 
 export const getCategories = createServerFn({ method: "GET" }).handler(async () => {
