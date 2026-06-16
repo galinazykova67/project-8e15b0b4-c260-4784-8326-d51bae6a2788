@@ -176,3 +176,82 @@ export const importYmlCatalog = createServerFn({ method: "POST" })
       products: prodUpserted,
     };
   });
+
+export const importYmlFromUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ url: z.string().url() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Доступ запрещён: требуется роль администратора");
+    const res = await fetch(data.url);
+    if (!res.ok) throw new Error(`Не удалось скачать файл: HTTP ${res.status}`);
+    const xml = await res.text();
+    return await runImport(xml);
+  });
+
+async function runImport(xml: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const parsed = parseYml(xml);
+
+  const usedSlugs = new Set<string>();
+  const catRows = parsed.categories.map((c) => {
+    const base = slugify(`${c.name}-${c.yml_id}`, `cat-${c.yml_id}`);
+    let slug = base;
+    let i = 1;
+    while (usedSlugs.has(slug)) slug = `${base}-${i++}`;
+    usedSlugs.add(slug);
+    return { yml_id: c.yml_id, parent_yml_id: c.parent_yml_id, name: c.name, slug };
+  });
+
+  const chunk = <T,>(arr: T[], n: number) =>
+    Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
+
+  let catUpserted = 0;
+  for (const batch of chunk(catRows, 500)) {
+    const { error } = await supabaseAdmin.from("categories").upsert(batch, { onConflict: "yml_id" });
+    if (error) throw new Error(`Категории: ${error.message}`);
+    catUpserted += batch.length;
+  }
+
+  const prodUsedSlugs = new Set<string>();
+  const prodRows = parsed.offers.map((o) => {
+    const base = slugify(`${o.name}-${o.yml_id}`, `p-${o.yml_id}`);
+    let slug = base;
+    let i = 1;
+    while (prodUsedSlugs.has(slug)) slug = `${base}-${i++}`;
+    prodUsedSlugs.add(slug);
+    const searchParts = [o.name, o.vendor, o.vendor_code, o.description, ...Object.values(o.params)]
+      .filter(Boolean).join(" ").toLowerCase();
+    return {
+      yml_id: o.yml_id, category_yml_id: o.category_yml_id, name: o.name, slug,
+      vendor: o.vendor, vendor_code: o.vendor_code, price: o.price, old_price: o.old_price,
+      currency: o.currency, description: o.description, pictures: o.pictures,
+      available: o.available, params: o.params, search_text: searchParts,
+    };
+  });
+
+  let prodUpserted = 0;
+  for (const batch of chunk(prodRows, 500)) {
+    const { error } = await supabaseAdmin.from("products").upsert(batch, { onConflict: "yml_id" });
+    if (error) throw new Error(`Товары: ${error.message}`);
+    prodUpserted += batch.length;
+  }
+  return { categories: catUpserted, products: prodUpserted };
+}
+
+// One-shot seed: only runs while the catalog is empty. Safe to leave deployed.
+export const seedCatalogIfEmpty = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ url: z.string().url() }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { count, error: cErr } = await supabaseAdmin
+      .from("products").select("id", { count: "exact", head: true });
+    if (cErr) throw new Error(cErr.message);
+    if ((count ?? 0) > 0) return { skipped: true, existing: count, categories: 0, products: 0 };
+    const res = await fetch(data.url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const xml = await res.text();
+    const r = await runImport(xml);
+    return { skipped: false, existing: 0, ...r };
+  });
