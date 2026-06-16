@@ -40,7 +40,7 @@ function CatalogPage() {
   const [q, setQ] = useState(search.q ?? "");
   const onSearch = (e: FormEvent) => {
     e.preventDefault();
-    navigate({ search: (s) => ({ ...s, q: q.trim() || undefined, page: 1 }) });
+    navigate({ search: (s: typeof search) => ({ ...s, q: q.trim() || undefined, page: 1 }) });
   };
 
   const topCats = (cats ?? []).filter((c) => !c.parent_yml_id);
@@ -92,7 +92,7 @@ function CatalogPage() {
               <select
                 value={search.sort}
                 onChange={(e) =>
-                  navigate({ search: (s) => ({ ...s, sort: e.target.value as typeof search.sort }) })
+                  navigate({ search: (s: typeof search) => ({ ...s, sort: e.target.value as typeof search.sort }) })
                 }
                 className="h-9 px-3 rounded-md border border-input bg-background text-sm"
               >
@@ -116,7 +116,7 @@ function CatalogPage() {
                   <div className="flex items-center justify-center gap-2 mt-8">
                     <button
                       disabled={search.page <= 1}
-                      onClick={() => navigate({ search: (s) => ({ ...s, page: s.page - 1 }) })}
+                      onClick={() => navigate({ search: (s: typeof search) => ({ ...s, page: s.page - 1 }) })}
                       className="h-9 px-4 rounded-md border border-input disabled:opacity-50 hover:bg-accent text-sm"
                     >
                       Назад
@@ -126,7 +126,7 @@ function CatalogPage() {
                     </div>
                     <button
                       disabled={search.page >= totalPages}
-                      onClick={() => navigate({ search: (s) => ({ ...s, page: s.page + 1 }) })}
+                      onClick={() => navigate({ search: (s: typeof search) => ({ ...s, page: s.page + 1 }) })}
                       className="h-9 px-4 rounded-md border border-input disabled:opacity-50 hover:bg-accent text-sm"
                     >
                       Вперёд

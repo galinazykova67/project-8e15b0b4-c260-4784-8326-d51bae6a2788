@@ -76,7 +76,7 @@ function CategoryPage() {
         <div className="flex justify-end mb-4">
           <select
             value={search.sort}
-            onChange={(e) => navigate({ search: (s) => ({ ...s, sort: e.target.value as typeof search.sort }) })}
+            onChange={(e) => navigate({ search: (s: typeof search) => ({ ...s, sort: e.target.value as typeof search.sort }) })}
             className="h-9 px-3 rounded-md border border-input bg-background text-sm"
           >
             <option value="new">Сначала новые</option>
@@ -97,13 +97,13 @@ function CategoryPage() {
               <div className="flex items-center justify-center gap-2 mt-8">
                 <button
                   disabled={search.page <= 1}
-                  onClick={() => navigate({ search: (s) => ({ ...s, page: s.page - 1 }) })}
+                  onClick={() => navigate({ search: (s: typeof search) => ({ ...s, page: s.page - 1 }) })}
                   className="h-9 px-4 rounded-md border border-input disabled:opacity-50 hover:bg-accent text-sm"
                 >Назад</button>
                 <div className="text-sm text-muted-foreground px-3">Стр. {search.page} из {totalPages}</div>
                 <button
                   disabled={search.page >= totalPages}
-                  onClick={() => navigate({ search: (s) => ({ ...s, page: s.page + 1 }) })}
+                  onClick={() => navigate({ search: (s: typeof search) => ({ ...s, page: s.page + 1 }) })}
                   className="h-9 px-4 rounded-md border border-input disabled:opacity-50 hover:bg-accent text-sm"
                 >Вперёд</button>
               </div>
