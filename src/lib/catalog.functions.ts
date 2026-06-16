@@ -15,9 +15,6 @@ function publicClient() {
   );
 }
 
-async function withPublic<T>(fn: (sb: ReturnType<typeof publicClient>) => Promise<T>): Promise<T> {
-  return fn(publicClient());
-}
 
 export const getCategories = createServerFn({ method: "GET" }).handler(async () => {
   const sb = publicClient();
