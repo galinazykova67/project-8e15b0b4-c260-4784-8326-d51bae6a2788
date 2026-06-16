@@ -20,7 +20,7 @@ async function withPublic<T>(fn: (sb: ReturnType<typeof publicClient>) => Promis
 }
 
 export const getCategories = createServerFn({ method: "GET" }).handler(async () => {
-  const sb = await publicClient();
+  const sb = publicClient();
   const { data, error } = await sb
     .from("categories")
     .select("id, yml_id, parent_yml_id, name, slug")
@@ -44,7 +44,7 @@ export const listProducts = createServerFn({ method: "GET" })
       .parse(d),
   )
   .handler(async ({ data }) => {
-    const sb = await publicClient();
+    const sb = publicClient();
     let categoryYmlId: string | null = null;
     if (data.categorySlug) {
       const { data: cat } = await sb
@@ -87,7 +87,7 @@ export const listProducts = createServerFn({ method: "GET" })
 export const getProduct = createServerFn({ method: "GET" })
   .inputValidator((d) => z.object({ slug: z.string() }).parse(d))
   .handler(async ({ data }) => {
-    const sb = await publicClient();
+    const sb = publicClient();
     const { data: p, error } = await sb
       .from("products")
       .select("*")
