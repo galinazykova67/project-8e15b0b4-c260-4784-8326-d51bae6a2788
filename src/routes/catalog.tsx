@@ -8,7 +8,7 @@ import { getCategories, listProducts } from "@/lib/catalog.functions";
 
 const searchSchema = z.object({
   q: z.string().optional(),
-  page: z.number().int().min(1).default(1),
+  page: z.coerce.number().int().min(1).default(1),
   sort: z.enum(["new", "price_asc", "price_desc", "name"]).default("new"),
 });
 
