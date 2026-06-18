@@ -1,10 +1,18 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingCart, MapPin, Phone, User, LogOut } from "lucide-react";
+import { ShoppingCart, MapPin, Phone, User, LogOut, Mail } from "lucide-react";
 import { useCart } from "@/lib/cart-store";
 import { SITE } from "@/lib/site-config";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchBox } from "@/components/site/search-box";
+
+function VkIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M13.162 18.994c.494 0 .701-.337.696-.752-.026-1.564.59-2.404 1.673-1.32 1.196 1.197 1.444 2.072 2.882 2.072h2.551c.71 0 1.04-.225 1.04-.586 0-.764-1.265-2.116-2.346-3.122-1.515-1.41-1.583-1.45-.266-3.125 1.575-2.005 3.66-4.708 1.948-4.708h-2.927c-.717 0-.767.298-1.066.952-1.084 2.355-2.985 5.31-3.711 4.81-.76-.523-.413-2.682-.355-6.187.015-.913.012-1.544-1.395-1.879-.769-.183-1.522-.252-2.21-.252-2.749 0-4.605.797-3.7 1.224 1.586.751 1.435 4.273 1.054 5.755-.66 2.581-3.123-2.262-4.16-4.687-.246-.581-.317-.96-1.214-.96H-.0073c-.477 0-.832.137-.832.503 0 .768 3.06 7.882 6.018 11.563 2.872 3.572 5.815 3.286 7.984 3.286z" transform="translate(.832)"/>
+    </svg>
+  );
+}
 
 export function SiteHeader() {
   const count = useCart((s) => s.count());
@@ -18,9 +26,14 @@ export function SiteHeader() {
           <div className="hidden sm:flex items-center gap-1.5 opacity-90">
             <MapPin className="h-3.5 w-3.5" /> {SITE.address}
           </div>
-          <a href={SITE.phoneHref} className="flex items-center gap-1.5 font-medium hover:opacity-80">
-            <Phone className="h-3.5 w-3.5" /> {SITE.phone}
-          </a>
+          <div className="flex items-center gap-3 ml-auto">
+            <a href={SITE.emailHref} className="hidden sm:flex items-center gap-1.5 hover:opacity-80">
+              <Mail className="h-3.5 w-3.5" /> {SITE.email}
+            </a>
+            <a href={SITE.phoneHref} className="flex items-center gap-1.5 font-medium hover:opacity-80">
+              <Phone className="h-3.5 w-3.5" /> {SITE.phone}
+            </a>
+          </div>
         </div>
       </div>
 
@@ -37,6 +50,24 @@ export function SiteHeader() {
         <SearchBox className="flex-1 max-w-2xl hidden md:block" />
 
         <nav className="flex items-center gap-1 sm:gap-2 ml-auto md:ml-0">
+          <a
+            href={SITE.phoneHref}
+            className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-accent text-foreground"
+            title={SITE.phone}
+            aria-label="Позвонить"
+          >
+            <Phone className="h-4 w-4" />
+          </a>
+          <a
+            href={SITE.vk}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-accent text-foreground"
+            title="ВКонтакте"
+            aria-label="Группа ВКонтакте"
+          >
+            <VkIcon className="h-5 w-5" />
+          </a>
           {isAdmin && (
             <Link
               to="/admin"
