@@ -49,17 +49,20 @@ export const Route = createFileRoute("/catalog/$slug")({
 });
 
 function CategoryPage() {
-  const { category, allCategories } = Route.useLoaderData();
+  const { category, allCategories } = Route.useLoaderData() as {
+    category: { id: string; yml_id: string; parent_yml_id: string | null; name: string; slug: string };
+    allCategories: Array<{ id: string; yml_id: string; parent_yml_id: string | null; name: string; slug: string }>;
+  };
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
 
   const subcategories = allCategories.filter((c) => c.parent_yml_id === category.yml_id);
-  // Build breadcrumb
   const crumbs: typeof allCategories = [];
   let cur: (typeof allCategories)[number] | undefined = category;
   while (cur) {
     crumbs.unshift(cur);
-    cur = cur.parent_yml_id ? allCategories.find((c) => c.yml_id === cur!.parent_yml_id) : undefined;
+    const parentId: string | null = cur.parent_yml_id;
+    cur = parentId ? allCategories.find((c) => c.yml_id === parentId) : undefined;
   }
 
   const { data, isLoading } = useQuery({
