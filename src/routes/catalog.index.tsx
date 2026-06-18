@@ -69,7 +69,13 @@ function CatalogPage() {
             <div>
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Категории</div>
               <div className="space-y-1">
-                <Link to="/catalog" className="block text-sm px-3 py-1.5 rounded hover:bg-accent font-medium">
+                <Link
+                  to="/catalog"
+                  search={{ page: 1, sort: search.sort }}
+                  className="block text-sm px-3 py-1.5 rounded hover:bg-accent font-medium"
+                  activeProps={{ className: "block text-sm px-3 py-1.5 rounded bg-accent text-brand font-medium" }}
+                  activeOptions={{ exact: true }}
+                >
                   Все товары
                 </Link>
                 {topCats.map((c) => (
@@ -77,7 +83,9 @@ function CatalogPage() {
                     key={c.id}
                     to="/catalog/$slug"
                     params={{ slug: c.slug }}
+                    search={{ page: 1, sort: search.sort }}
                     className="block text-sm px-3 py-1.5 rounded hover:bg-accent"
+                    activeProps={{ className: "block text-sm px-3 py-1.5 rounded bg-accent text-brand font-medium" }}
                   >
                     {c.name}
                   </Link>
