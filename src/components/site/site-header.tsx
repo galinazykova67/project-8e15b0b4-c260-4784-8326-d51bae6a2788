@@ -34,17 +34,7 @@ export function SiteHeader() {
           </div>
         </Link>
 
-        <form onSubmit={onSearch} className="flex-1 max-w-2xl hidden md:flex">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Поиск по названию, артикулу..."
-              className="w-full h-10 pl-10 pr-4 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-        </form>
+        <SearchBox className="flex-1 max-w-2xl hidden md:block" />
 
         <nav className="flex items-center gap-1 sm:gap-2 ml-auto md:ml-0">
           {isAdmin && (
