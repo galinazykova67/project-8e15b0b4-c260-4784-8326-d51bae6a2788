@@ -282,6 +282,16 @@ export const seedCatalogIfEmpty = createServerFn({ method: "POST" })
     return { skipped: false, existing: 0, ...r };
   });
 
+// Force re-sync: always re-imports from the XML feed. Used by daily cron.
+export const syncCatalogFromUrl = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ url: z.string().url() }).parse(d))
+  .handler(async ({ data }) => {
+    const res = await fetch(data.url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const xml = await res.text();
+    return await runImport(xml);
+  });
+
 // ---------- ADMIN CATEGORY MANAGEMENT ----------
 
 async function assertAdmin(context: { supabase: ReturnType<typeof createClient<Database>>; userId: string }) {
