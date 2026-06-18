@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, FileText, Loader2, Package, ShoppingBag } from "lucide-react";
+import { Upload, FileText, Loader2, Package, ShoppingBag, FolderTree } from "lucide-react";
 import { SiteLayout } from "@/components/site/site-layout";
+import { CategoriesTab } from "@/components/admin/categories-tab";
 import { importYmlCatalog } from "@/lib/catalog.functions";
 import { listOrders, getOrderItems, updateOrderStatus } from "@/lib/orders.functions";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminPage() {
   const { isAdmin, loading: authLoading, user } = useAuth();
-  const [tab, setTab] = useState<"import" | "orders">("import");
+  const [tab, setTab] = useState<"import" | "categories" | "orders">("import");
 
   if (authLoading) {
     return (
@@ -44,12 +45,18 @@ function AdminPage() {
     <SiteLayout>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Админ-панель</h1>
-        <div className="flex gap-2 border-b border-border mb-6">
+        <div className="flex gap-2 border-b border-border mb-6 flex-wrap">
           <button
             onClick={() => setTab("import")}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px ${tab === "import" ? "border-brand text-brand" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             <Upload className="h-4 w-4 inline mr-2" /> Импорт каталога
+          </button>
+          <button
+            onClick={() => setTab("categories")}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px ${tab === "categories" ? "border-brand text-brand" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            <FolderTree className="h-4 w-4 inline mr-2" /> Категории
           </button>
           <button
             onClick={() => setTab("orders")}
@@ -59,7 +66,7 @@ function AdminPage() {
           </button>
         </div>
 
-        {tab === "import" ? <ImportTab /> : <OrdersTab />}
+        {tab === "import" ? <ImportTab /> : tab === "categories" ? <CategoriesTab /> : <OrdersTab />}
       </div>
     </SiteLayout>
   );

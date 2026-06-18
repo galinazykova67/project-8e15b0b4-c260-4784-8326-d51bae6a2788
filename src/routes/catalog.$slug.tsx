@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
+import { ChevronRight, FolderOpen } from "lucide-react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { ProductCard } from "@/components/site/product-card";
 import { getCategories, listProducts } from "@/lib/catalog.functions";
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/catalog/$slug")({
     });
     const cat = cats.find((c) => c.slug === params.slug);
     if (!cat) throw notFound();
-    return { category: cat };
+    return { category: cat, allCategories: cats };
   },
   head: ({ loaderData }) => ({
     meta: [
@@ -48,9 +49,21 @@ export const Route = createFileRoute("/catalog/$slug")({
 });
 
 function CategoryPage() {
-  const { category } = Route.useLoaderData();
+  const { category, allCategories } = Route.useLoaderData() as {
+    category: { id: string; yml_id: string; parent_yml_id: string | null; name: string; slug: string };
+    allCategories: Array<{ id: string; yml_id: string; parent_yml_id: string | null; name: string; slug: string }>;
+  };
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
+
+  const subcategories = allCategories.filter((c) => c.parent_yml_id === category.yml_id);
+  const crumbs: typeof allCategories = [];
+  let cur: (typeof allCategories)[number] | undefined = category;
+  while (cur) {
+    crumbs.unshift(cur);
+    const parentId: string | null = cur.parent_yml_id;
+    cur = parentId ? allCategories.find((c) => c.yml_id === parentId) : undefined;
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ["products", "cat", category.slug, search],
@@ -65,13 +78,38 @@ function CategoryPage() {
   return (
     <SiteLayout>
       <div className="container mx-auto px-4 py-8">
-        <div className="text-sm text-muted-foreground mb-2">
+        <nav className="text-sm text-muted-foreground mb-2 flex flex-wrap items-center gap-1">
           <Link to="/" className="hover:text-brand">Главная</Link>
-          {" / "}
+          <ChevronRight className="h-3 w-3" />
           <Link to="/catalog" className="hover:text-brand">Каталог</Link>
-        </div>
+          {crumbs.slice(0, -1).map((c) => (
+            <span key={c.id} className="flex items-center gap-1">
+              <ChevronRight className="h-3 w-3" />
+              <Link to="/catalog/$slug" params={{ slug: c.slug }} className="hover:text-brand">{c.name}</Link>
+            </span>
+          ))}
+        </nav>
         <h1 className="text-3xl font-bold mb-2">{category.name}</h1>
         <p className="text-muted-foreground mb-6">{data?.total ?? 0} товаров</p>
+
+        {subcategories.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Подкатегории</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {subcategories.map((s) => (
+                <Link
+                  key={s.id}
+                  to="/catalog/$slug"
+                  params={{ slug: s.slug }}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-brand hover:bg-accent transition-colors"
+                >
+                  <FolderOpen className="h-5 w-5 text-brand shrink-0" />
+                  <span className="text-sm font-medium line-clamp-2">{s.name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-end mb-4">
           <select
@@ -109,11 +147,11 @@ function CategoryPage() {
               </div>
             )}
           </>
-        ) : (
+        ) : subcategories.length === 0 ? (
           <div className="text-center py-20 rounded-lg border border-dashed border-border text-muted-foreground">
             В этой категории пока нет товаров
           </div>
-        )}
+        ) : null}
       </div>
     </SiteLayout>
   );
