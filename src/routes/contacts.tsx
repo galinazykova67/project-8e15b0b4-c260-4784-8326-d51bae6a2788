@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MapPin, Phone, Clock } from "lucide-react";
+import { MapPin, Phone, Clock, Mail } from "lucide-react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { SITE } from "@/lib/site-config";
 
@@ -34,11 +34,30 @@ function ContactsPage() {
             <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Телефон</div>
             <a href={SITE.phoneHref} className="font-semibold hover:text-brand">{SITE.phone}</a>
           </div>
-          <div className="rounded-lg border border-border bg-card p-6 sm:col-span-2">
+          <div className="rounded-lg border border-border bg-card p-6">
+            <Mail className="h-6 w-6 text-brand mb-3" />
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Email</div>
+            <a href={SITE.emailHref} className="font-semibold hover:text-brand">{SITE.email}</a>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-6">
             <Clock className="h-6 w-6 text-brand mb-3" />
             <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Режим работы</div>
             <div className="font-semibold">Пн–Пт: 9:00–19:00</div>
             <div className="font-semibold">Сб–Вс: 10:00–17:00</div>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-6 sm:col-span-2 flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Мы в соцсетях</div>
+              <div className="font-semibold">Группа ВКонтакте</div>
+            </div>
+            <a
+              href={SITE.vk}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-md bg-brand text-brand-foreground font-semibold hover:opacity-90"
+            >
+              Открыть vk.ru/avtom67
+            </a>
           </div>
         </div>
 
