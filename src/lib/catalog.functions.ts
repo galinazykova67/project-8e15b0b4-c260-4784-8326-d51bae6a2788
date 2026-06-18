@@ -281,3 +281,109 @@ export const seedCatalogIfEmpty = createServerFn({ method: "POST" })
     const r = await runImport(xml);
     return { skipped: false, existing: 0, ...r };
   });
+
+// ---------- ADMIN CATEGORY MANAGEMENT ----------
+
+async function assertAdmin(context: { supabase: ReturnType<typeof createClient<Database>>; userId: string }) {
+  const { data: isAdmin } = await context.supabase.rpc("has_role", {
+    _user_id: context.userId,
+    _role: "admin",
+  });
+  if (!isAdmin) throw new Error("Доступ запрещён: требуется роль администратора");
+}
+
+export const adminListCategories = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("categories")
+      .select("id, yml_id, parent_yml_id, name, slug, visible, sort_order")
+      .order("sort_order")
+      .order("name");
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const adminCategoryToggleVisible = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid(), visible: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("categories")
+      .update({ visible: data.visible })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminCategoryUpsert = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      id: z.string().uuid().optional(),
+      name: z.string().min(1).max(200),
+      parent_yml_id: z.string().nullable().optional(),
+      sort_order: z.number().int().optional(),
+      visible: z.boolean().optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.id) {
+      const { error } = await supabaseAdmin.from("categories").update({
+        name: data.name,
+        parent_yml_id: data.parent_yml_id ?? null,
+        sort_order: data.sort_order ?? 0,
+        visible: data.visible ?? true,
+      }).eq("id", data.id);
+      if (error) throw new Error(error.message);
+      return { ok: true };
+    }
+    const yml_id = `m-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+    const slugBase = slugify(`${data.name}-${yml_id}`, `cat-${yml_id}`);
+    const { error } = await supabaseAdmin.from("categories").insert({
+      yml_id,
+      name: data.name,
+      parent_yml_id: data.parent_yml_id ?? null,
+      slug: slugBase,
+      sort_order: data.sort_order ?? 0,
+      visible: data.visible ?? true,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminCategoryDelete = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Find the category by id to get its yml_id
+    const { data: cat, error: e1 } = await supabaseAdmin
+      .from("categories")
+      .select("yml_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (e1) throw new Error(e1.message);
+    if (!cat) throw new Error("Категория не найдена");
+    // Check for children
+    const { count: childCount } = await supabaseAdmin
+      .from("categories")
+      .select("id", { count: "exact", head: true })
+      .eq("parent_yml_id", cat.yml_id);
+    if ((childCount ?? 0) > 0) throw new Error("Сначала удалите подкатегории");
+    const { count: prodCount } = await supabaseAdmin
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("category_yml_id", cat.yml_id);
+    if ((prodCount ?? 0) > 0) throw new Error(`В категории ${prodCount} товаров. Удаление запрещено.`);
+    const { error } = await supabaseAdmin.from("categories").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
