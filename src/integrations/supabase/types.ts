@@ -21,7 +21,9 @@ export type Database = {
           name: string
           parent_yml_id: string | null
           slug: string
+          sort_order: number
           updated_at: string
+          visible: boolean
           yml_id: string
         }
         Insert: {
@@ -30,7 +32,9 @@ export type Database = {
           name: string
           parent_yml_id?: string | null
           slug: string
+          sort_order?: number
           updated_at?: string
+          visible?: boolean
           yml_id: string
         }
         Update: {
@@ -39,7 +43,9 @@ export type Database = {
           name?: string
           parent_yml_id?: string | null
           slug?: string
+          sort_order?: number
           updated_at?: string
+          visible?: boolean
           yml_id?: string
         }
         Relationships: []
@@ -146,6 +152,7 @@ export type Database = {
           updated_at: string
           vendor: string | null
           vendor_code: string | null
+          visible: boolean
           yml_id: string
         }
         Insert: {
@@ -165,6 +172,7 @@ export type Database = {
           updated_at?: string
           vendor?: string | null
           vendor_code?: string | null
+          visible?: boolean
           yml_id: string
         }
         Update: {
@@ -184,6 +192,7 @@ export type Database = {
           updated_at?: string
           vendor?: string | null
           vendor_code?: string | null
+          visible?: boolean
           yml_id?: string
         }
         Relationships: []
