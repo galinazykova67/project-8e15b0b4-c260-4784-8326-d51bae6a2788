@@ -20,11 +20,41 @@ export const getCategories = createServerFn({ method: "GET" }).handler(async () 
   const sb = publicClient();
   const { data, error } = await sb
     .from("categories")
-    .select("id, yml_id, parent_yml_id, name, slug")
+    .select("id, yml_id, parent_yml_id, name, slug, sort_order")
+    .eq("visible", true)
+    .order("sort_order")
     .order("name");
   if (error) throw new Error(error.message);
   return data ?? [];
 });
+
+async function resolveCategoryTreeIds(
+  sb: ReturnType<typeof publicClient>,
+  slug: string,
+): Promise<string[] | null> {
+  const { data: all, error } = await sb
+    .from("categories")
+    .select("yml_id, parent_yml_id, slug, visible");
+  if (error) throw new Error(error.message);
+  const cats = all ?? [];
+  const root = cats.find((c) => c.slug === slug);
+  if (!root) return null;
+  const byParent = new Map<string, typeof cats>();
+  for (const c of cats) {
+    const k = c.parent_yml_id ?? "";
+    if (!byParent.has(k)) byParent.set(k, []);
+    byParent.get(k)!.push(c);
+  }
+  const ids: string[] = [];
+  const walk = (ymlId: string) => {
+    ids.push(ymlId);
+    for (const child of byParent.get(ymlId) ?? []) {
+      if (child.visible) walk(child.yml_id);
+    }
+  };
+  walk(root.yml_id);
+  return ids;
+}
 
 export const listProducts = createServerFn({ method: "GET" })
   .inputValidator((d) =>
@@ -42,15 +72,10 @@ export const listProducts = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }) => {
     const sb = publicClient();
-    let categoryYmlId: string | null = null;
+    let categoryIds: string[] | null = null;
     if (data.categorySlug) {
-      const { data: cat } = await sb
-        .from("categories")
-        .select("yml_id")
-        .eq("slug", data.categorySlug)
-        .maybeSingle();
-      if (!cat) return { items: [], total: 0 };
-      categoryYmlId = cat.yml_id;
+      categoryIds = await resolveCategoryTreeIds(sb, data.categorySlug);
+      if (!categoryIds || categoryIds.length === 0) return { items: [], total: 0 };
     }
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
@@ -59,9 +84,10 @@ export const listProducts = createServerFn({ method: "GET" })
       .from("products")
       .select("id, yml_id, name, slug, price, old_price, currency, pictures, available, vendor", {
         count: "exact",
-      });
+      })
+      .eq("visible", true);
 
-    if (categoryYmlId) q = q.eq("category_yml_id", categoryYmlId);
+    if (categoryIds) q = q.in("category_yml_id", categoryIds);
     if (data.search && data.search.trim()) {
       const term = data.search.trim().replace(/[%,]/g, " ");
       q = q.ilike("search_text", `%${term}%`);
