@@ -74,6 +74,11 @@ export function SiteHeader() {
         </nav>
       </div>
 
+      {/* mobile search */}
+      <div className="md:hidden border-t border-border px-4 py-3">
+        <SearchBox />
+      </div>
+
       {/* secondary nav */}
       <div className="border-t border-border bg-surface">
         <div className="container mx-auto px-4 h-11 flex items-center gap-1 overflow-x-auto text-sm">
