@@ -1,23 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingCart, Search, MapPin, Phone, User, LogOut } from "lucide-react";
-import { useState, type FormEvent } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { ShoppingCart, MapPin, Phone, User, LogOut } from "lucide-react";
 import { useCart } from "@/lib/cart-store";
 import { SITE } from "@/lib/site-config";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { SearchBox } from "@/components/site/search-box";
 
 export function SiteHeader() {
   const count = useCart((s) => s.count());
   const { user, isAdmin } = useAuth();
-  const [q, setQ] = useState("");
-  const navigate = useNavigate();
-
-  const onSearch = (e: FormEvent) => {
-    e.preventDefault();
-    const term = q.trim();
-    navigate({ to: "/catalog", search: term ? { q: term } : {} });
-  };
 
   return (
     <header className="border-b border-border bg-background sticky top-0 z-40">
@@ -43,17 +34,7 @@ export function SiteHeader() {
           </div>
         </Link>
 
-        <form onSubmit={onSearch} className="flex-1 max-w-2xl hidden md:flex">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Поиск по названию, артикулу..."
-              className="w-full h-10 pl-10 pr-4 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-        </form>
+        <SearchBox className="flex-1 max-w-2xl hidden md:block" />
 
         <nav className="flex items-center gap-1 sm:gap-2 ml-auto md:ml-0">
           {isAdmin && (
@@ -91,6 +72,11 @@ export function SiteHeader() {
             )}
           </Link>
         </nav>
+      </div>
+
+      {/* mobile search */}
+      <div className="md:hidden border-t border-border px-4 py-3">
+        <SearchBox />
       </div>
 
       {/* secondary nav */}
