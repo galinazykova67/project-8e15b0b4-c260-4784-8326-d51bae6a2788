@@ -12,7 +12,7 @@ const searchSchema = z.object({
   sort: z.enum(["new", "price_asc", "price_desc", "name"]).default("new"),
 });
 
-export const Route = createFileRoute("/catalog")({
+export const Route = createFileRoute("/catalog/")({
   head: () => ({
     meta: [
       { title: "Каталог автотоваров — Автоключ" },

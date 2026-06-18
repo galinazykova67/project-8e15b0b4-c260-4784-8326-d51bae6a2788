@@ -10,11 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ContactsRouteImport } from './routes/contacts'
-import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CatalogIndexRouteImport } from './routes/catalog.index'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as CatalogSlugRouteImport } from './routes/catalog.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -23,11 +23,6 @@ import { Route as ApiPublicSeedCatalogRouteImport } from './routes/api/public/se
 const ContactsRoute = ContactsRouteImport.update({
   id: '/contacts',
   path: '/contacts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CatalogRoute = CatalogRouteImport.update({
-  id: '/catalog',
-  path: '/catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -49,15 +44,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CatalogIndexRoute = CatalogIndexRouteImport.update({
+  id: '/catalog/',
+  path: '/catalog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductSlugRoute = ProductSlugRouteImport.update({
   id: '/product/$slug',
   path: '/product/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogSlugRoute = CatalogSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => CatalogRoute,
+  id: '/catalog/$slug',
+  path: '/catalog/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
@@ -74,22 +74,22 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
-  '/catalog': typeof CatalogRouteWithChildren
   '/contacts': typeof ContactsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/catalog/$slug': typeof CatalogSlugRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/catalog/': typeof CatalogIndexRoute
   '/api/public/seed-catalog': typeof ApiPublicSeedCatalogRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
-  '/catalog': typeof CatalogRouteWithChildren
   '/contacts': typeof ContactsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/catalog/$slug': typeof CatalogSlugRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/catalog': typeof CatalogIndexRoute
   '/api/public/seed-catalog': typeof ApiPublicSeedCatalogRoute
 }
 export interface FileRoutesById {
@@ -98,11 +98,11 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
-  '/catalog': typeof CatalogRouteWithChildren
   '/contacts': typeof ContactsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/catalog/$slug': typeof CatalogSlugRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/catalog/': typeof CatalogIndexRoute
   '/api/public/seed-catalog': typeof ApiPublicSeedCatalogRoute
 }
 export interface FileRouteTypes {
@@ -111,22 +111,22 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/cart'
-    | '/catalog'
     | '/contacts'
     | '/admin'
     | '/catalog/$slug'
     | '/product/$slug'
+    | '/catalog/'
     | '/api/public/seed-catalog'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/cart'
-    | '/catalog'
     | '/contacts'
     | '/admin'
     | '/catalog/$slug'
     | '/product/$slug'
+    | '/catalog'
     | '/api/public/seed-catalog'
   id:
     | '__root__'
@@ -134,11 +134,11 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/cart'
-    | '/catalog'
     | '/contacts'
     | '/_authenticated/admin'
     | '/catalog/$slug'
     | '/product/$slug'
+    | '/catalog/'
     | '/api/public/seed-catalog'
   fileRoutesById: FileRoutesById
 }
@@ -147,9 +147,10 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CartRoute: typeof CartRoute
-  CatalogRoute: typeof CatalogRouteWithChildren
   ContactsRoute: typeof ContactsRoute
+  CatalogSlugRoute: typeof CatalogSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
+  CatalogIndexRoute: typeof CatalogIndexRoute
   ApiPublicSeedCatalogRoute: typeof ApiPublicSeedCatalogRoute
 }
 
@@ -160,13 +161,6 @@ declare module '@tanstack/react-router' {
       path: '/contacts'
       fullPath: '/contacts'
       preLoaderRoute: typeof ContactsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/catalog': {
-      id: '/catalog'
-      path: '/catalog'
-      fullPath: '/catalog'
-      preLoaderRoute: typeof CatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -197,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/catalog/': {
+      id: '/catalog/'
+      path: '/catalog'
+      fullPath: '/catalog/'
+      preLoaderRoute: typeof CatalogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/product/$slug': {
       id: '/product/$slug'
       path: '/product/$slug'
@@ -206,10 +207,10 @@ declare module '@tanstack/react-router' {
     }
     '/catalog/$slug': {
       id: '/catalog/$slug'
-      path: '/$slug'
+      path: '/catalog/$slug'
       fullPath: '/catalog/$slug'
       preLoaderRoute: typeof CatalogSlugRouteImport
-      parentRoute: typeof CatalogRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
@@ -239,25 +240,15 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface CatalogRouteChildren {
-  CatalogSlugRoute: typeof CatalogSlugRoute
-}
-
-const CatalogRouteChildren: CatalogRouteChildren = {
-  CatalogSlugRoute: CatalogSlugRoute,
-}
-
-const CatalogRouteWithChildren =
-  CatalogRoute._addFileChildren(CatalogRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CartRoute: CartRoute,
-  CatalogRoute: CatalogRouteWithChildren,
   ContactsRoute: ContactsRoute,
+  CatalogSlugRoute: CatalogSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
+  CatalogIndexRoute: CatalogIndexRoute,
   ApiPublicSeedCatalogRoute: ApiPublicSeedCatalogRoute,
 }
 export const routeTree = rootRouteImport
