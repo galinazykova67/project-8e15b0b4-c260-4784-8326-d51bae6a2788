@@ -1,23 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingCart, Search, MapPin, Phone, User, LogOut } from "lucide-react";
-import { useState, type FormEvent } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { ShoppingCart, MapPin, Phone, User, LogOut } from "lucide-react";
 import { useCart } from "@/lib/cart-store";
 import { SITE } from "@/lib/site-config";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { SearchBox } from "@/components/site/search-box";
 
 export function SiteHeader() {
   const count = useCart((s) => s.count());
   const { user, isAdmin } = useAuth();
-  const [q, setQ] = useState("");
-  const navigate = useNavigate();
-
-  const onSearch = (e: FormEvent) => {
-    e.preventDefault();
-    const term = q.trim();
-    navigate({ to: "/catalog", search: term ? { q: term } : {} });
-  };
 
   return (
     <header className="border-b border-border bg-background sticky top-0 z-40">
