@@ -82,7 +82,7 @@ export const listProducts = createServerFn({ method: "GET" })
 
     let q = sb
       .from("products")
-      .select("id, yml_id, name, slug, price, old_price, currency, pictures, available, vendor", {
+      .select("id, yml_id, name, slug, price, old_price, currency, pictures, available, vendor, vendor_code", {
         count: "exact",
       })
       .eq("visible", true);
@@ -90,7 +90,7 @@ export const listProducts = createServerFn({ method: "GET" })
     if (categoryIds) q = q.in("category_yml_id", categoryIds);
     if (data.search && data.search.trim()) {
       const term = data.search.trim().replace(/[%,]/g, " ");
-      q = q.ilike("search_text", `%${term}%`);
+      q = q.or(`name.ilike.%${term}%,vendor_code.ilike.%${term}%,search_text.ilike.%${term}%`);
     }
     if (data.minPrice != null) q = q.gte("price", data.minPrice);
     if (data.maxPrice != null) q = q.lte("price", data.maxPrice);

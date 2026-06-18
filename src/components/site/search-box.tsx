@@ -78,7 +78,9 @@ export function SearchBox({ className = "" }: { className?: string }) {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium truncate">{p.name}</div>
-                        {p.vendor && <div className="text-xs text-muted-foreground truncate">{p.vendor}</div>}
+                        <div className="text-xs text-muted-foreground truncate">
+                          {p.vendor_code ? `Артикул: ${p.vendor_code}` : p.vendor}
+                        </div>
                       </div>
                       <div className="text-sm font-semibold whitespace-nowrap">{formatPrice(Number(p.price))}</div>
                     </Link>
