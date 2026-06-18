@@ -11,6 +11,7 @@ export interface ProductCardData {
   pictures: string[];
   available: boolean;
   vendor: string | null;
+  vendor_code?: string | null;
 }
 
 export function ProductCard({ p }: { p: ProductCardData }) {
@@ -34,6 +35,7 @@ export function ProductCard({ p }: { p: ProductCardData }) {
         <Link to="/product/$slug" params={{ slug: p.slug }} className="font-medium text-sm leading-snug line-clamp-2 hover:text-brand">
           {p.name}
         </Link>
+        {p.vendor_code && <div className="text-xs text-muted-foreground">Артикул: <span className="font-mono">{p.vendor_code}</span></div>}
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <div>
             <div className="font-bold text-base text-foreground">{formatPrice(p.price)}</div>
@@ -47,7 +49,7 @@ export function ProductCard({ p }: { p: ProductCardData }) {
                 product_id: p.id,
                 product_name: p.name,
                 slug: p.slug,
-                vendor_code: null,
+                vendor_code: p.vendor_code ?? null,
                 price: p.price,
                 picture: img ?? null,
               })
