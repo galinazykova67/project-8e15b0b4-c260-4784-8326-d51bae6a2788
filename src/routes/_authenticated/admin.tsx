@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminPage() {
   const { isAdmin, loading: authLoading, user } = useAuth();
-  const [tab, setTab] = useState<"import" | "categories" | "orders">("import");
+  const [tab, setTab] = useState<"import" | "categories" | "seo" | "orders">("import");
 
   if (authLoading) {
     return (
