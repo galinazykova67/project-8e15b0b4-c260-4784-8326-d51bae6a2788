@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/site/product-card";
 import { getCategories, listProducts } from "@/lib/catalog.functions";
 import { getPageSeo } from "@/lib/seo.functions";
 import { SITE } from "@/lib/site-config";
+import { RouteErrorFallback, RouteNotFoundFallback } from "@/components/site/route-fallbacks";
 
 const featuredOpts = queryOptions({
   queryKey: ["featured-products"],
@@ -44,6 +45,8 @@ export const Route = createFileRoute("/")({
     return { seo };
   },
   component: Home,
+  errorComponent: RouteErrorFallback,
+  notFoundComponent: RouteNotFoundFallback,
 });
 
 function Home() {

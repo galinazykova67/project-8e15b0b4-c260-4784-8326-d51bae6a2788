@@ -236,6 +236,42 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_runs: {
+        Row: {
+          categories_count: number | null
+          duration_ms: number | null
+          error: string | null
+          finished_at: string | null
+          id: string
+          products_count: number | null
+          source: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          categories_count?: number | null
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          products_count?: number | null
+          source: string
+          started_at?: string
+          status: string
+        }
+        Update: {
+          categories_count?: number | null
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          products_count?: number | null
+          source?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

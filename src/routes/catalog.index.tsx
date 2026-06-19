@@ -6,6 +6,7 @@ import { SiteLayout } from "@/components/site/site-layout";
 import { ProductCard } from "@/components/site/product-card";
 import { getCategories, listProducts } from "@/lib/catalog.functions";
 import { getPageSeo } from "@/lib/seo.functions";
+import { RouteErrorFallback, RouteNotFoundFallback } from "@/components/site/route-fallbacks";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -37,6 +38,8 @@ export const Route = createFileRoute("/catalog/")({
   },
   validateSearch: searchSchema,
   component: CatalogPage,
+  errorComponent: RouteErrorFallback,
+  notFoundComponent: RouteNotFoundFallback,
 });
 
 function CatalogPage() {

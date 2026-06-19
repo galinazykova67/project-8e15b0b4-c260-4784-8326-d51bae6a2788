@@ -3,6 +3,7 @@ import { MapPin, Phone, Clock, Mail } from "lucide-react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { SITE } from "@/lib/site-config";
 import { getPageSeo } from "@/lib/seo.functions";
+import { RouteErrorFallback, RouteNotFoundFallback } from "@/components/site/route-fallbacks";
 
 export const Route = createFileRoute("/contacts")({
   loader: async ({ context }) => {
@@ -27,6 +28,8 @@ export const Route = createFileRoute("/contacts")({
     };
   },
   component: ContactsPage,
+  errorComponent: RouteErrorFallback,
+  notFoundComponent: RouteNotFoundFallback,
 });
 
 function ContactsPage() {
