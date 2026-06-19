@@ -129,8 +129,96 @@ function SeoEditor({
   );
 }
 
-// ------- Categories -------
-function CategoriesSeo() {
+// ------- Bulk generation bar -------
+function BulkGenerateBar({ kind, invalidateKeys }: { kind: "category" | "product"; invalidateKeys: string[] }) {
+  const qc = useQueryClient();
+  const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; failed: number; remaining: number; total: number } | null>(null);
+  const stopRef = useRef(false);
+
+  const { data: countData, refetch } = useQuery({
+    queryKey: ["seo-bulk-count", kind],
+    queryFn: () => adminBulkCountMissing({ data: { kind } }),
+  });
+  const remaining = countData?.remaining ?? 0;
+
+  const start = async () => {
+    if (running) return;
+    const total = remaining;
+    if (total === 0) {
+      toast.info("Все элементы уже имеют SEO");
+      return;
+    }
+    if (!confirm(`Сгенерировать SEO для ${total} ${kind === "category" ? "категорий" : "товаров"}? Это потратит кредиты Lovable AI.`)) return;
+
+    setRunning(true);
+    stopRef.current = false;
+    let done = 0;
+    let failed = 0;
+    let left = total;
+
+    try {
+      while (!stopRef.current && left > 0) {
+        const r = await adminBulkGenerateSeo({ data: { kind, batchSize: 5 } });
+        done += r.processed;
+        failed += r.failed;
+        left = r.remaining;
+        setProgress({ done, failed, remaining: left, total });
+        if (r.processed === 0 && r.failed === 0) break;
+      }
+      if (stopRef.current) toast.info(`Остановлено. Готово: ${done}, ошибок: ${failed}`);
+      else toast.success(`Готово! Сгенерировано: ${done}${failed ? `, с ошибками: ${failed}` : ""}`);
+    } catch (e) {
+      toast.error("Ошибка массовой генерации", { description: (e as Error).message });
+    } finally {
+      setRunning(false);
+      refetch();
+      for (const k of invalidateKeys) qc.invalidateQueries({ queryKey: [k] });
+    }
+  };
+
+  const stop = () => { stopRef.current = true; };
+
+  return (
+    <div className="mb-4 rounded-lg border border-brand/30 bg-brand/5 p-4">
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex-1 min-w-[200px]">
+          <div className="font-semibold text-sm">Массовая генерация SEO</div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            Без SEO: <span className="font-mono font-medium text-foreground">{remaining}</span>
+            {progress && running && (
+              <> · обработано {progress.done}/{progress.total}{progress.failed ? `, ошибок ${progress.failed}` : ""}</>
+            )}
+          </div>
+        </div>
+        {!running ? (
+          <button
+            onClick={start}
+            disabled={remaining === 0}
+            className="inline-flex items-center gap-2 h-9 px-4 rounded-md btn-brand text-sm font-medium disabled:opacity-50"
+          >
+            <Zap className="h-4 w-4" /> Сгенерировать всё
+          </button>
+        ) : (
+          <button
+            onClick={stop}
+            className="inline-flex items-center gap-2 h-9 px-4 rounded-md border border-destructive text-destructive text-sm font-medium hover:bg-destructive/10"
+          >
+            <StopCircle className="h-4 w-4" /> Остановить
+          </button>
+        )}
+      </div>
+      {running && progress && (
+        <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full bg-brand transition-all"
+            style={{ width: `${Math.min(100, ((progress.done + progress.failed) / Math.max(1, progress.total)) * 100)}%` }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
   const qc = useQueryClient();
   const [filter, setFilter] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
