@@ -55,7 +55,7 @@ function Home() {
               <span className="h-1.5 w-1.5 rounded-full bg-brand" /> Магазин в Смоленске
             </div>
             <h1 className="text-4xl lg:text-6xl font-extrabold leading-[1.05] mb-5">
-              Автотовары для вашей машины — <span className="text-brand">в одном месте</span>
+              Автоинструмент и оборудование для автосервиса — <span className="text-brand">в Смоленске</span>
             </h1>
             <p className="text-base lg:text-lg opacity-80 mb-8 max-w-xl">
               Запчасти, расходники, аксессуары и автокомпоненты. Более 3000 позиций в каталоге, самовывоз с {SITE.address}.
