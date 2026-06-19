@@ -332,6 +332,7 @@ function ProductsSeo() {
 
   return (
     <div>
+      <BulkGenerateBar kind="product" invalidateKeys={["seo-products"]} />
       <form
         onSubmit={(e) => { e.preventDefault(); setPage(1); setSearchQ(search); }}
         className="mb-4 flex flex-wrap gap-2 items-center"
