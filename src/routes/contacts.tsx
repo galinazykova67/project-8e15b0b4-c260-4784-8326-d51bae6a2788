@@ -48,12 +48,12 @@ function ContactsPage() {
           <div className="rounded-lg border border-border bg-card p-6">
             <Phone className="h-6 w-6 text-brand mb-3" />
             <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Телефон</div>
-            <a href={SITE.phoneHref} className="font-semibold hover:text-brand">{SITE.phone}</a>
+            <a href={SITE.phoneHref} target="_top" rel="noopener" className="font-semibold hover:text-brand">{SITE.phone}</a>
           </div>
           <div className="rounded-lg border border-border bg-card p-6">
             <Mail className="h-6 w-6 text-brand mb-3" />
             <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Email</div>
-            <a href={SITE.emailHref} className="font-semibold hover:text-brand">{SITE.email}</a>
+            <a href={SITE.emailHref} target="_top" rel="noopener" className="font-semibold hover:text-brand">{SITE.email}</a>
           </div>
           <div className="rounded-lg border border-border bg-card p-6">
             <Clock className="h-6 w-6 text-brand mb-3" />
