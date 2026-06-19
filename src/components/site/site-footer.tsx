@@ -1,6 +1,5 @@
 import { MapPin, Phone, Clock, Mail } from "lucide-react";
 import { SITE } from "@/lib/site-config";
-import logoAsset from "@/assets/avtoklyuch-logo-transparent.png.asset.json";
 
 function VkIcon({ className }: { className?: string }) {
   return (
