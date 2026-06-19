@@ -219,6 +219,9 @@ function BulkGenerateBar({ kind, invalidateKeys }: { kind: "category" | "product
     </div>
   );
 }
+
+// ------- Categories -------
+function CategoriesSeo() {
   const qc = useQueryClient();
   const [filter, setFilter] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
