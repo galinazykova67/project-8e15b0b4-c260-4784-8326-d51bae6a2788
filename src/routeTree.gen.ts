@@ -18,6 +18,7 @@ import { Route as CatalogIndexRouteImport } from './routes/catalog.index'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as CatalogSlugRouteImport } from './routes/catalog.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiPublicSyncJtcRouteImport } from './routes/api/public/sync-jtc'
 import { Route as ApiPublicSyncCatalogRouteImport } from './routes/api/public/sync-catalog'
 import { Route as ApiPublicSeedCatalogRouteImport } from './routes/api/public/seed-catalog'
 
@@ -65,6 +66,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicSyncJtcRoute = ApiPublicSyncJtcRouteImport.update({
+  id: '/api/public/sync-jtc',
+  path: '/api/public/sync-jtc',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSyncCatalogRoute = ApiPublicSyncCatalogRouteImport.update({
   id: '/api/public/sync-catalog',
   path: '/api/public/sync-catalog',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/catalog/': typeof CatalogIndexRoute
   '/api/public/seed-catalog': typeof ApiPublicSeedCatalogRoute
   '/api/public/sync-catalog': typeof ApiPublicSyncCatalogRoute
+  '/api/public/sync-jtc': typeof ApiPublicSyncJtcRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/catalog': typeof CatalogIndexRoute
   '/api/public/seed-catalog': typeof ApiPublicSeedCatalogRoute
   '/api/public/sync-catalog': typeof ApiPublicSyncCatalogRoute
+  '/api/public/sync-jtc': typeof ApiPublicSyncJtcRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/catalog/': typeof CatalogIndexRoute
   '/api/public/seed-catalog': typeof ApiPublicSeedCatalogRoute
   '/api/public/sync-catalog': typeof ApiPublicSyncCatalogRoute
+  '/api/public/sync-jtc': typeof ApiPublicSyncJtcRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/catalog/'
     | '/api/public/seed-catalog'
     | '/api/public/sync-catalog'
+    | '/api/public/sync-jtc'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/api/public/seed-catalog'
     | '/api/public/sync-catalog'
+    | '/api/public/sync-jtc'
   id:
     | '__root__'
     | '/'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/catalog/'
     | '/api/public/seed-catalog'
     | '/api/public/sync-catalog'
+    | '/api/public/sync-jtc'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   CatalogIndexRoute: typeof CatalogIndexRoute
   ApiPublicSeedCatalogRoute: typeof ApiPublicSeedCatalogRoute
   ApiPublicSyncCatalogRoute: typeof ApiPublicSyncCatalogRoute
+  ApiPublicSyncJtcRoute: typeof ApiPublicSyncJtcRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/sync-jtc': {
+      id: '/api/public/sync-jtc'
+      path: '/api/public/sync-jtc'
+      fullPath: '/api/public/sync-jtc'
+      preLoaderRoute: typeof ApiPublicSyncJtcRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/sync-catalog': {
       id: '/api/public/sync-catalog'
       path: '/api/public/sync-catalog'
@@ -271,6 +291,7 @@ const rootRouteChildren: RootRouteChildren = {
   CatalogIndexRoute: CatalogIndexRoute,
   ApiPublicSeedCatalogRoute: ApiPublicSeedCatalogRoute,
   ApiPublicSyncCatalogRoute: ApiPublicSyncCatalogRoute,
+  ApiPublicSyncJtcRoute: ApiPublicSyncJtcRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -58,13 +58,16 @@ export function parseYml(xml: string): YmlParseResult {
       const k = toStr(p["@_name"]);
       if (k) params[k] = toStr(p["#text"] ?? p);
     }
+    // YML allows multiple <categoryId> per offer (broad → narrow). Pick the most specific (last).
+    const catIds = toArr<unknown>(o.categoryId as unknown);
+    const categoryIdLeaf = catIds.length ? toStr(catIds[catIds.length - 1]) : null;
     const priceStr = toStr(o.price);
     const oldPriceStr = toStr(o.oldprice);
     const name = toStr(o.name) || toStr(o.model) || "Товар";
     const availableAttr = o["@_available"];
     return {
       yml_id: toStr(o["@_id"]),
-      category_yml_id: o.categoryId != null ? toStr(o.categoryId) : null,
+      category_yml_id: categoryIdLeaf,
       name,
       vendor: o.vendor ? toStr(o.vendor) : null,
       vendor_code: o.vendorCode ? toStr(o.vendorCode) : null,
