@@ -19,15 +19,41 @@ export const Route = createFileRoute("/product/$slug")({
     const seoD = (p as { seo_description?: string | null }).seo_description?.trim();
     const title = seoT || `${p.name} — Автоключ`;
     const description = seoD || (p.description ?? p.name).slice(0, 160);
+    const image = p.pictures?.[0];
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: p.name,
+      description,
+      image: p.pictures && p.pictures.length > 0 ? p.pictures : undefined,
+      sku: p.vendor_code ?? undefined,
+      brand: p.vendor ? { "@type": "Brand", name: p.vendor } : undefined,
+      offers: {
+        "@type": "Offer",
+        price: Number(p.price),
+        priceCurrency: p.currency || "RUB",
+        availability: p.available
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+        url: `/product/${p.slug}`,
+      },
+    };
     return {
       meta: [
         { title },
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
-        ...(p.pictures?.[0] ? [{ property: "og:image", content: p.pictures[0] }] : []),
+        { property: "og:type", content: "product" },
+        ...(image ? [{ property: "og:image", content: image }] : []),
       ],
       links: [{ rel: "canonical", href: `/product/${p.slug}` }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(jsonLd),
+        },
+      ],
     };
   },
   component: ProductPage,
@@ -87,7 +113,7 @@ function ProductPage() {
           <div>
             <div className="aspect-square rounded-lg border border-border bg-surface overflow-hidden grid place-items-center">
               {pictures[activeImg] ? (
-                <img src={pictures[activeImg]} alt={product.name} className="w-full h-full object-contain p-6" />
+                <img src={pictures[activeImg]} alt={product.name} loading="eager" fetchPriority="high" decoding="async" className="w-full h-full object-contain p-6" />
               ) : (
                 <div className="text-muted-foreground">Нет фото</div>
               )}
@@ -100,7 +126,7 @@ function ProductPage() {
                     onClick={() => setActiveImg(i)}
                     className={`shrink-0 h-20 w-20 rounded border-2 overflow-hidden bg-surface ${i === activeImg ? "border-brand" : "border-border"}`}
                   >
-                    <img src={src} alt="" className="w-full h-full object-contain p-1" />
+                    <img src={src} alt="" loading="lazy" decoding="async" className="w-full h-full object-contain p-1" />
                   </button>
                 ))}
               </div>

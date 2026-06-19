@@ -91,6 +91,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Автоключ",
+          url: "/",
+          telephone: "+7 (910) 768-84-70",
+          email: "info@avtom67.ru",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "ул. Шевченко, 86Б",
+            addressLocality: "Смоленск",
+            addressCountry: "RU",
+          },
+          sameAs: ["https://vk.ru/avtom67"],
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,

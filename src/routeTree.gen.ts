@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ContactsRouteImport } from './routes/contacts'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -22,6 +23,11 @@ import { Route as ApiPublicSyncJtcRouteImport } from './routes/api/public/sync-j
 import { Route as ApiPublicSyncCatalogRouteImport } from './routes/api/public/sync-catalog'
 import { Route as ApiPublicSeedCatalogRouteImport } from './routes/api/public/seed-catalog'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactsRoute = ContactsRouteImport.update({
   id: '/contacts',
   path: '/contacts',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/contacts': typeof ContactsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/catalog/$slug': typeof CatalogSlugRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/contacts': typeof ContactsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/catalog/$slug': typeof CatalogSlugRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/contacts': typeof ContactsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/catalog/$slug': typeof CatalogSlugRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cart'
     | '/contacts'
+    | '/sitemap.xml'
     | '/admin'
     | '/catalog/$slug'
     | '/product/$slug'
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cart'
     | '/contacts'
+    | '/sitemap.xml'
     | '/admin'
     | '/catalog/$slug'
     | '/product/$slug'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cart'
     | '/contacts'
+    | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/catalog/$slug'
     | '/product/$slug'
@@ -172,6 +184,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CartRoute: typeof CartRoute
   ContactsRoute: typeof ContactsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CatalogSlugRoute: typeof CatalogSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
   CatalogIndexRoute: typeof CatalogIndexRoute
@@ -182,6 +195,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contacts': {
       id: '/contacts'
       path: '/contacts'
@@ -286,6 +306,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CartRoute: CartRoute,
   ContactsRoute: ContactsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   CatalogSlugRoute: CatalogSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
   CatalogIndexRoute: CatalogIndexRoute,
