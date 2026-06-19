@@ -54,6 +54,8 @@ export function SiteHeader() {
         <nav className="flex items-center gap-1 sm:gap-2 ml-auto md:ml-0">
           <a
             href={SITE.phoneHref}
+            target="_top"
+            rel="noopener"
             className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-accent text-foreground"
             title={SITE.phone}
             aria-label="Позвонить"
