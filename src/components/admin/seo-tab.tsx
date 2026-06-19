@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Sparkles, Save, Search, FolderTree, Package, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, Sparkles, Save, Search, FolderTree, Package, FileText, ChevronLeft, ChevronRight, Zap, StopCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   adminListSeoCategories,
@@ -10,6 +10,8 @@ import {
   adminListPageSeo,
   adminUpsertPageSeo,
   adminGenerateSeo,
+  adminBulkCountMissing,
+  adminBulkGenerateSeo,
 } from "@/lib/seo.functions";
 
 type Sub = "categories" | "products" | "pages";
