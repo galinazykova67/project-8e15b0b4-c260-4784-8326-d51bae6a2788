@@ -22,13 +22,20 @@ export const Route = createFileRoute("/catalog/$slug")({
     if (!cat) throw notFound();
     return { category: cat, allCategories: cats };
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: `${loaderData?.category?.name ?? "Категория"} — Автоключ` },
-      { name: "description", content: `${loaderData?.category?.name ?? "Категория"} в каталоге автотоваров Автоключ.` },
-    ],
-    links: [{ rel: "canonical", href: `/catalog/${loaderData?.category?.slug ?? ""}` }],
-  }),
+  head: ({ loaderData }) => {
+    const c = loaderData?.category as { name?: string; slug?: string; seo_title?: string | null; seo_description?: string | null } | undefined;
+    const title = c?.seo_title?.trim() || `${c?.name ?? "Категория"} — Автоключ`;
+    const description = c?.seo_description?.trim() || `${c?.name ?? "Категория"} в каталоге автотоваров Автоключ.`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: `/catalog/${c?.slug ?? ""}` }],
+    };
+  },
   component: CategoryPage,
   notFoundComponent: () => (
     <SiteLayout>

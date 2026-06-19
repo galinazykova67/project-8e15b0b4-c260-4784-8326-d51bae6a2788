@@ -20,6 +20,8 @@ export type Database = {
           id: string
           name: string
           parent_yml_id: string | null
+          seo_description: string | null
+          seo_title: string | null
           slug: string
           sort_order: number
           updated_at: string
@@ -31,6 +33,8 @@ export type Database = {
           id?: string
           name: string
           parent_yml_id?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug: string
           sort_order?: number
           updated_at?: string
@@ -42,6 +46,8 @@ export type Database = {
           id?: string
           name?: string
           parent_yml_id?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug?: string
           sort_order?: number
           updated_at?: string
@@ -134,6 +140,33 @@ export type Database = {
         }
         Relationships: []
       }
+      page_seo: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          path: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          path: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          path?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           available: boolean
@@ -148,6 +181,8 @@ export type Database = {
           pictures: string[]
           price: number
           search_text: string | null
+          seo_description: string | null
+          seo_title: string | null
           slug: string
           updated_at: string
           vendor: string | null
@@ -168,6 +203,8 @@ export type Database = {
           pictures?: string[]
           price?: number
           search_text?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug: string
           updated_at?: string
           vendor?: string | null
@@ -188,6 +225,8 @@ export type Database = {
           pictures?: string[]
           price?: number
           search_text?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug?: string
           updated_at?: string
           vendor?: string | null

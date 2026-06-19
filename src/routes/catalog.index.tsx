@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { ProductCard } from "@/components/site/product-card";
 import { getCategories, listProducts } from "@/lib/catalog.functions";
+import { getPageSeo } from "@/lib/seo.functions";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -13,13 +14,27 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/catalog/")({
-  head: () => ({
-    meta: [
-      { title: "Каталог автотоваров — Автоключ" },
-      { name: "description", content: "Полный каталог автотоваров магазина Автоключ в Смоленске." },
-    ],
-    links: [{ rel: "canonical", href: "/catalog" }],
-  }),
+  loader: async ({ context }) => {
+    const seo = await context.queryClient.ensureQueryData({
+      queryKey: ["page-seo", "/catalog"],
+      queryFn: () => getPageSeo({ data: { path: "/catalog" } }),
+    });
+    return { seo };
+  },
+  head: ({ loaderData }) => {
+    const seo = (loaderData as { seo?: { title: string | null; description: string | null } | null } | undefined)?.seo;
+    const title = seo?.title?.trim() || "Каталог автотоваров — Автоключ";
+    const description = seo?.description?.trim() || "Полный каталог автотоваров магазина Автоключ в Смоленске.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: "/catalog" }],
+    };
+  },
   validateSearch: searchSchema,
   component: CatalogPage,
 });
