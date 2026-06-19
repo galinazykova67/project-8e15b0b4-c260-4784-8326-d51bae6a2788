@@ -99,7 +99,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "Organization",
           name: "Автоключ",
           url: "/",
-          telephone: "+7 (910) 768-84-70",
+          telephone: "+7 (4812) 20-93-19",
           email: "info@avtom67.ru",
           address: {
             "@type": "PostalAddress",
