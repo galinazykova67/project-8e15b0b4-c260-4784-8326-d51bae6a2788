@@ -28,10 +28,10 @@ export function SiteHeader() {
             <MapPin className="h-3.5 w-3.5" /> {SITE.address}
           </div>
           <div className="flex items-center gap-3 ml-auto">
-            <a href={SITE.emailHref} className="hidden sm:flex items-center gap-1.5 hover:opacity-80">
+            <a href={SITE.emailHref} target="_top" rel="noopener" className="hidden sm:flex items-center gap-1.5 hover:opacity-80">
               <Mail className="h-3.5 w-3.5" /> {SITE.email}
             </a>
-            <a href={SITE.phoneHref} className="flex items-center gap-1.5 font-medium hover:opacity-80">
+            <a href={SITE.phoneHref} target="_top" rel="noopener" className="flex items-center gap-1.5 font-medium hover:opacity-80">
               <Phone className="h-3.5 w-3.5" /> {SITE.phone}
             </a>
           </div>
