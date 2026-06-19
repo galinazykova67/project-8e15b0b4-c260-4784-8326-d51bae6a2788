@@ -57,10 +57,10 @@
   --primary: oklch(0.22 0.015 250);
   --primary-foreground: oklch(0.99 0 0);
 
-  /* brand = яркий синий из логотипа */
-  --brand: oklch(0.48 0.27 199);
+  /* brand = яркий синий из логотипа #1149FE */
+  --brand: #1149FE;
   --brand-foreground: oklch(0.99 0 0);
-  --brand-dark: oklch(0.40 0.23 199);
+  --brand-dark: #0d3acc;
 
   --secondary: oklch(0.96 0.005 250);
   --secondary-foreground: oklch(0.22 0.015 250);
@@ -74,7 +74,7 @@
 
   --border: oklch(0.91 0.01 250);
   --input: oklch(0.91 0.01 250);
-  --ring: oklch(0.48 0.27 199);
+  --ring: #1149FE;
 }
 
 .dark {
@@ -87,9 +87,9 @@
   --popover-foreground: oklch(0.98 0 0);
   --primary: oklch(0.98 0 0);
   --primary-foreground: oklch(0.18 0.01 250);
-  --brand: oklch(0.56 0.27 199);
+  --brand: #3d6cfe;
   --brand-foreground: oklch(0.99 0 0);
-  --brand-dark: oklch(0.48 0.24 199);
+  --brand-dark: #2a5af0;
   --secondary: oklch(0.27 0.01 250);
   --secondary-foreground: oklch(0.98 0 0);
   --muted: oklch(0.27 0.01 250);
@@ -100,7 +100,7 @@
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.56 0.27 199);
+  --ring: #3d6cfe;
 }
 
 @layer base {
