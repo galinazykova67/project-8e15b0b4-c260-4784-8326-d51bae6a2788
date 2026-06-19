@@ -5,6 +5,7 @@ import { SITE } from "@/lib/site-config";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchBox } from "@/components/site/search-box";
+import logoAsset from "@/assets/avtoklyuch-logo.png.asset.json";
 
 function VkIcon({ className }: { className?: string }) {
   return (
