@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, FileText, Loader2, Package, ShoppingBag, FolderTree } from "lucide-react";
+import { Upload, FileText, Loader2, Package, ShoppingBag, FolderTree, Search } from "lucide-react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { CategoriesTab } from "@/components/admin/categories-tab";
+import { SeoTab } from "@/components/admin/seo-tab";
 import { importYmlCatalog } from "@/lib/catalog.functions";
 import { listOrders, getOrderItems, updateOrderStatus } from "@/lib/orders.functions";
 import { useAuth } from "@/hooks/use-auth";
