@@ -40,12 +40,13 @@ export function SiteHeader() {
 
       {/* main bar */}
       <div className="container mx-auto px-4 py-4 flex items-center gap-4 lg:gap-8">
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="h-10 w-10 rounded-md bg-brand text-brand-foreground grid place-items-center font-bold text-lg">А</div>
-          <div className="leading-tight">
-            <div className="font-bold text-lg text-foreground">{SITE.name}</div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Автотовары</div>
-          </div>
+        <Link to="/" className="flex items-center shrink-0" aria-label={SITE.name}>
+          <img
+            src={logoAsset.url}
+            alt={SITE.name}
+            className="h-10 sm:h-12 w-auto"
+            loading="eager"
+          />
         </Link>
 
         <SearchBox className="flex-1 max-w-2xl hidden md:block" />
