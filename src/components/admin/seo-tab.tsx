@@ -247,6 +247,7 @@ function CategoriesSeo() {
 
   return (
     <div>
+      <BulkGenerateBar kind="category" invalidateKeys={["seo-categories"]} />
       <div className="mb-4 relative">
         <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input
