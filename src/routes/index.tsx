@@ -80,7 +80,7 @@ function Home() {
               <Link to="/catalog" className="btn-brand h-12 px-6 rounded-md font-semibold inline-flex items-center gap-2">
                 Открыть каталог <ArrowRight className="h-4 w-4" />
               </Link>
-              <a href={SITE.phoneHref} className="h-12 px-6 rounded-md border border-white/20 bg-white/5 hover:bg-white/10 font-medium inline-flex items-center gap-2">
+              <a href={SITE.phoneHref} target="_top" rel="noopener" className="h-12 px-6 rounded-md border border-white/20 bg-white/5 hover:bg-white/10 font-medium inline-flex items-center gap-2">
                 <Phone className="h-4 w-4" /> {SITE.phone}
               </a>
             </div>

@@ -31,8 +31,8 @@ export function SiteFooter() {
         <div className="space-y-2 text-sm">
           <h3 className="font-semibold uppercase text-xs tracking-wider opacity-70 mb-3">Контакты</h3>
           <div className="flex items-start gap-2"><MapPin className="h-4 w-4 mt-0.5 shrink-0" /> {SITE.address}</div>
-          <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={SITE.phoneHref} className="hover:underline">{SITE.phone}</a></div>
-          <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={SITE.emailHref} className="hover:underline">{SITE.email}</a></div>
+          <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={SITE.phoneHref} target="_top" rel="noopener" className="hover:underline">{SITE.phone}</a></div>
+          <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={SITE.emailHref} target="_top" rel="noopener" className="hover:underline">{SITE.email}</a></div>
         </div>
         <div className="space-y-2 text-sm">
           <h3 className="font-semibold uppercase text-xs tracking-wider opacity-70 mb-3">Режим работы</h3>
