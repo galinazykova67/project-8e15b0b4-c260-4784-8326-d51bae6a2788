@@ -261,3 +261,132 @@ export const adminGenerateSeo = createServerFn({ method: "POST" })
 
     return await generateWithAI(prompt);
   });
+
+// ---------- Bulk generation ----------
+
+async function buildCategoryPrompt(c: { name: string; parent_yml_id: string | null }, parentName: string): Promise<string> {
+  return `Категория каталога: "${c.name}"${parentName ? ` (раздел: ${parentName})` : ""}.
+Это страница списка товаров данной категории в магазине автоинструмента в Смоленске.
+Сгенерируй SEO title и description для этой страницы каталога.`;
+}
+
+async function buildProductPrompt(p: {
+  name: string;
+  vendor: string | null;
+  vendor_code: string | null;
+  description: string | null;
+  params: unknown;
+}, categoryName: string): Promise<string> {
+  const params = p.params && typeof p.params === "object"
+    ? Object.entries(p.params as Record<string, unknown>).slice(0, 8).map(([k, v]) => `${k}: ${v}`).join("; ")
+    : "";
+  return `Товар: "${p.name}".
+Бренд: ${p.vendor ?? "—"}. Артикул: ${p.vendor_code ?? "—"}.
+Категория: ${categoryName || "—"}.
+Описание: ${(p.description ?? "").slice(0, 600) || "—"}.
+Характеристики: ${params || "—"}.
+Сгенерируй SEO title и description для карточки товара.`;
+}
+
+export const adminBulkCountMissing = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ kind: z.enum(["category", "product"]) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const table = data.kind === "category" ? "categories" : "products";
+    const { count, error } = await supabaseAdmin
+      .from(table)
+      .select("id", { count: "exact", head: true })
+      .or("seo_title.is.null,seo_description.is.null");
+    if (error) throw new Error(error.message);
+    return { remaining: count ?? 0 };
+  });
+
+export const adminBulkGenerateSeo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      kind: z.enum(["category", "product"]),
+      batchSize: z.number().int().min(1).max(10).default(5),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    if (data.kind === "category") {
+      const { data: items, error } = await supabaseAdmin
+        .from("categories")
+        .select("id, name, parent_yml_id")
+        .or("seo_title.is.null,seo_description.is.null")
+        .order("name")
+        .limit(data.batchSize);
+      if (error) throw new Error(error.message);
+      if (!items || items.length === 0) return { processed: 0, failed: 0, remaining: 0 };
+
+      // Fetch parent names in one query
+      const parentIds = Array.from(new Set(items.map((i) => i.parent_yml_id).filter(Boolean) as string[]));
+      const parents = parentIds.length
+        ? (await supabaseAdmin.from("categories").select("yml_id, name").in("yml_id", parentIds)).data ?? []
+        : [];
+      const parentMap = new Map(parents.map((p) => [p.yml_id, p.name]));
+
+      let processed = 0;
+      let failed = 0;
+      const results = await Promise.allSettled(
+        items.map(async (c) => {
+          const prompt = await buildCategoryPrompt(c, parentMap.get(c.parent_yml_id ?? "") ?? "");
+          const seo = await generateWithAI(prompt);
+          const { error: upErr } = await supabaseAdmin
+            .from("categories")
+            .update({ seo_title: seo.title, seo_description: seo.description })
+            .eq("id", c.id);
+          if (upErr) throw new Error(upErr.message);
+        }),
+      );
+      for (const r of results) (r.status === "fulfilled" ? processed++ : failed++);
+
+      const { count } = await supabaseAdmin
+        .from("categories")
+        .select("id", { count: "exact", head: true })
+        .or("seo_title.is.null,seo_description.is.null");
+      return { processed, failed, remaining: count ?? 0 };
+    } else {
+      const { data: items, error } = await supabaseAdmin
+        .from("products")
+        .select("id, name, vendor, vendor_code, description, params, category_yml_id")
+        .or("seo_title.is.null,seo_description.is.null")
+        .order("name")
+        .limit(data.batchSize);
+      if (error) throw new Error(error.message);
+      if (!items || items.length === 0) return { processed: 0, failed: 0, remaining: 0 };
+
+      const catIds = Array.from(new Set(items.map((i) => i.category_yml_id).filter(Boolean) as string[]));
+      const cats = catIds.length
+        ? (await supabaseAdmin.from("categories").select("yml_id, name").in("yml_id", catIds)).data ?? []
+        : [];
+      const catMap = new Map(cats.map((c) => [c.yml_id, c.name]));
+
+      let processed = 0;
+      let failed = 0;
+      const results = await Promise.allSettled(
+        items.map(async (p) => {
+          const prompt = await buildProductPrompt(p, catMap.get(p.category_yml_id ?? "") ?? "");
+          const seo = await generateWithAI(prompt);
+          const { error: upErr } = await supabaseAdmin
+            .from("products")
+            .update({ seo_title: seo.title, seo_description: seo.description })
+            .eq("id", p.id);
+          if (upErr) throw new Error(upErr.message);
+        }),
+      );
+      for (const r of results) (r.status === "fulfilled" ? processed++ : failed++);
+
+      const { count } = await supabaseAdmin
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .or("seo_title.is.null,seo_description.is.null");
+      return { processed, failed, remaining: count ?? 0 };
+    }
+  });
