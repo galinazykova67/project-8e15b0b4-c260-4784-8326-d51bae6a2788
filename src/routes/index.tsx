@@ -4,6 +4,7 @@ import { ArrowRight, ShieldCheck, Truck, Wrench, Phone } from "lucide-react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { ProductCard } from "@/components/site/product-card";
 import { getCategories, listProducts } from "@/lib/catalog.functions";
+import { getPageSeo } from "@/lib/seo.functions";
 import { SITE } from "@/lib/site-config";
 
 const featuredOpts = queryOptions({
@@ -14,22 +15,34 @@ const categoriesOpts = queryOptions({
   queryKey: ["categories"],
   queryFn: () => getCategories(),
 });
+const pageSeoOpts = queryOptions({
+  queryKey: ["page-seo", "/"],
+  queryFn: () => getPageSeo({ data: { path: "/" } }),
+});
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Автоключ — автотовары в Смоленске" },
-      { name: "description", content: "Каталог автотоваров: запчасти, аксессуары, автокомпоненты. Магазин в Смоленске на Шевченко 86Б." },
-      { property: "og:title", content: "Автоключ — автотовары в Смоленске" },
-      { property: "og:description", content: "Большой выбор автотоваров. Самовывоз и доставка по Смоленску." },
-    ],
-    links: [{ rel: "canonical", href: "/" }],
-  }),
-  loader: ({ context }) =>
-    Promise.all([
+  head: ({ loaderData }) => {
+    const seo = (loaderData as { seo?: { title: string | null; description: string | null } | null } | undefined)?.seo;
+    const title = seo?.title?.trim() || "Автоключ — автотовары в Смоленске";
+    const description = seo?.description?.trim() || "Каталог автотоваров: запчасти, аксессуары, автокомпоненты. Магазин в Смоленске на Шевченко 86Б.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: "/" }],
+    };
+  },
+  loader: async ({ context }) => {
+    const [_, __, seo] = await Promise.all([
       context.queryClient.ensureQueryData(featuredOpts),
       context.queryClient.ensureQueryData(categoriesOpts),
-    ]),
+      context.queryClient.ensureQueryData(pageSeoOpts),
+    ]);
+    return { seo };
+  },
   component: Home,
 });
 
