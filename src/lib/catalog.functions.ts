@@ -292,6 +292,80 @@ export const syncCatalogFromUrl = createServerFn({ method: "POST" })
     return await runImport(xml);
   });
 
+// JTC-specific sync: nests imported categories under a virtual root category.
+async function runImportUnderRoot(xml: string, rootName: string, rootYmlId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const parsed = parseYml(xml);
+
+  const rootSlug = slugify(rootName, `cat-${rootYmlId}`);
+  {
+    const { error } = await supabaseAdmin
+      .from("categories")
+      .upsert([{ yml_id: rootYmlId, parent_yml_id: null, name: rootName, slug: rootSlug }], {
+        onConflict: "yml_id",
+      });
+    if (error) throw new Error(`Корневая категория: ${error.message}`);
+  }
+
+  const usedSlugs = new Set<string>([rootSlug]);
+  const catRows = parsed.categories.map((c) => {
+    const base = slugify(`${c.name}-${c.yml_id}`, `cat-${c.yml_id}`);
+    let slug = base;
+    let i = 1;
+    while (usedSlugs.has(slug)) slug = `${base}-${i++}`;
+    usedSlugs.add(slug);
+    return {
+      yml_id: c.yml_id,
+      parent_yml_id: c.parent_yml_id ?? rootYmlId,
+      name: c.name,
+      slug,
+    };
+  });
+
+  const chunk = <T,>(arr: T[], n: number) =>
+    Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
+
+  let catUpserted = 1;
+  for (const batch of chunk(catRows, 500)) {
+    const { error } = await supabaseAdmin.from("categories").upsert(batch, { onConflict: "yml_id" });
+    if (error) throw new Error(`Категории: ${error.message}`);
+    catUpserted += batch.length;
+  }
+
+  const prodUsedSlugs = new Set<string>();
+  const prodRows = parsed.offers.map((o) => {
+    const base = slugify(`${o.name}-${o.yml_id}`, `p-${o.yml_id}`);
+    let slug = base;
+    let i = 1;
+    while (prodUsedSlugs.has(slug)) slug = `${base}-${i++}`;
+    prodUsedSlugs.add(slug);
+    const searchParts = [o.name, o.vendor, o.vendor_code, o.description, ...Object.values(o.params)]
+      .filter(Boolean).join(" ").toLowerCase();
+    return {
+      yml_id: o.yml_id, category_yml_id: o.category_yml_id, name: o.name, slug,
+      vendor: o.vendor, vendor_code: o.vendor_code, price: o.price, old_price: o.old_price,
+      currency: o.currency, description: o.description, pictures: o.pictures,
+      available: o.available, params: o.params, search_text: searchParts,
+    };
+  });
+
+  let prodUpserted = 0;
+  for (const batch of chunk(prodRows, 500)) {
+    const { error } = await supabaseAdmin.from("products").upsert(batch, { onConflict: "yml_id" });
+    if (error) throw new Error(`Товары: ${error.message}`);
+    prodUpserted += batch.length;
+  }
+  return { categories: catUpserted, products: prodUpserted };
+}
+
+export const syncJtcCatalog = createServerFn({ method: "POST" }).handler(async () => {
+  const url = "https://www.jtcrussia.ru/yml.xml";
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const xml = await res.text();
+  return await runImportUnderRoot(xml, "Автоинструмент", "jtc-root");
+});
+
 // ---------- ADMIN CATEGORY MANAGEMENT ----------
 
 async function assertAdmin(context: { supabase: ReturnType<typeof createClient<Database>>; userId: string }) {
