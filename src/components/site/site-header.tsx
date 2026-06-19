@@ -89,17 +89,17 @@ export function SiteHeader() {
           ) : (
             <Link to="/auth" className="inline-flex items-center gap-1.5 px-3 h-10 text-sm rounded-md hover:bg-accent">
               <User className="h-4 w-4" />
-              <span className="hidden sm:inline">Войти</span>
+            <span className="hidden sm:inline">Войти</span>
             </Link>
           )}
           <Link
             to="/cart"
-            className="relative inline-flex items-center gap-2 btn-brand h-10 px-4 rounded-md text-sm font-medium"
+            className="relative inline-flex items-center gap-1.5 sm:gap-2 btn-brand h-10 px-2.5 sm:px-4 rounded-md text-sm font-medium shrink-0"
           >
             <ShoppingCart className="h-4 w-4" />
             <span className="hidden sm:inline">Корзина</span>
             {count > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 grid place-items-center rounded-full bg-foreground text-background text-[10px] font-bold">
+              <span className="absolute -top-1.5 -right-1.5 sm:-right-1.5 min-w-5 h-5 px-1 grid place-items-center rounded-full bg-foreground text-background text-[10px] font-bold">
                 {count}
               </span>
             )}
