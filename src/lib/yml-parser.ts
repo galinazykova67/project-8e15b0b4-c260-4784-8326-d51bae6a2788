@@ -67,7 +67,7 @@ export function parseYml(xml: string): YmlParseResult {
     const availableAttr = o["@_available"];
     return {
       yml_id: toStr(o["@_id"]),
-      category_yml_id: o.categoryId != null ? toStr(o.categoryId) : null,
+      category_yml_id: categoryIdLeaf,
       name,
       vendor: o.vendor ? toStr(o.vendor) : null,
       vendor_code: o.vendorCode ? toStr(o.vendorCode) : null,
