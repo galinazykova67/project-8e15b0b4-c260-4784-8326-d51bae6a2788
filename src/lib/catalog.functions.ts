@@ -471,3 +471,36 @@ export const adminCategoryDelete = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ---------- ADMIN SYNC LOGS ----------
+
+export const adminListSyncRuns = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("sync_runs")
+      .select("id, source, status, categories_count, products_count, error, started_at, finished_at, duration_ms")
+      .order("started_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const adminTriggerJtcSync = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const apikey = process.env.SUPABASE_PUBLISHABLE_KEY!;
+    const projectId = process.env.SUPABASE_PROJECT_ID ?? "8e15b0b4-c260-4784-8326-d51bae6a2788";
+    const base = `https://project--${projectId}.lovable.app`;
+    const res = await fetch(`${base}/api/public/sync-jtc`, {
+      method: "POST",
+      headers: { "content-type": "application/json", apikey },
+      body: "{}",
+    });
+    const json = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
+    if (!res.ok || !json.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+    return json as { ok: true; categories: number; products: number; run_id: string };
+  });

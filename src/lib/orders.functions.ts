@@ -23,24 +23,45 @@ export const createOrder = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // recompute total from actual DB prices to avoid client tampering
+    // recompute total and validate availability from DB to avoid client tampering
     const ids = data.items.map((i) => i.product_id);
     const { data: dbProducts, error: prodErr } = await supabaseAdmin
       .from("products")
-      .select("id, name, price, vendor_code")
+      .select("id, name, price, vendor_code, available, visible")
       .in("id", ids);
     if (prodErr) throw new Error(prodErr.message);
 
     const byId = new Map((dbProducts ?? []).map((p) => [p.id, p]));
+
+    // Validate every item exists, is visible, and is available
+    const unavailable: string[] = [];
+    const missing: string[] = [];
+    for (const it of data.items) {
+      const p = byId.get(it.product_id);
+      if (!p) {
+        missing.push(it.product_name);
+        continue;
+      }
+      if (!p.visible || !p.available) {
+        unavailable.push(p.name);
+      }
+    }
+    if (missing.length > 0) {
+      throw new Error(`Товары не найдены: ${missing.join(", ")}`);
+    }
+    if (unavailable.length > 0) {
+      throw new Error(`Нет в наличии: ${unavailable.join(", ")}. Удалите их из корзины.`);
+    }
+
     let total = 0;
     const itemsToInsert = data.items.map((it) => {
-      const p = byId.get(it.product_id);
-      const price = p ? Number(p.price) : it.price;
+      const p = byId.get(it.product_id)!;
+      const price = Number(p.price);
       total += price * it.quantity;
       return {
         product_id: it.product_id,
-        product_name: p?.name ?? it.product_name,
-        vendor_code: p?.vendor_code ?? it.vendor_code ?? null,
+        product_name: p.name,
+        vendor_code: p.vendor_code ?? null,
         price,
         quantity: it.quantity,
       };
@@ -62,7 +83,11 @@ export const createOrder = createServerFn({ method: "POST" })
     const { error: itemsErr } = await supabaseAdmin
       .from("order_items")
       .insert(itemsToInsert.map((i) => ({ ...i, order_id: order.id })));
-    if (itemsErr) throw new Error(itemsErr.message);
+    if (itemsErr) {
+      // best-effort rollback so we never leave an empty order behind
+      await supabaseAdmin.from("orders").delete().eq("id", order.id);
+      throw new Error(itemsErr.message);
+    }
 
     return { id: order.id, total };
   });
