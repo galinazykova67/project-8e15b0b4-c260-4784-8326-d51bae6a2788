@@ -1,6 +1,5 @@
 import { MapPin, Phone, Clock, Mail } from "lucide-react";
 import { SITE } from "@/lib/site-config";
-import logoAsset from "@/assets/avtoklyuch-logo-transparent.png.asset.json";
 
 function VkIcon({ className }: { className?: string }) {
   return (
@@ -15,10 +14,7 @@ export function SiteFooter() {
     <footer className="mt-16 border-t border-border bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 py-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <img src={logoAsset.url} alt={SITE.name} className="h-9 w-auto" />
-            <div className="font-bold text-lg">{SITE.name}</div>
-          </div>
+          <div className="font-bold text-lg mb-3">{SITE.name}</div>
           <p className="text-sm opacity-80 mb-4">{SITE.tagline}</p>
           <a
             href={SITE.vk}
