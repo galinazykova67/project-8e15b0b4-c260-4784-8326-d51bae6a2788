@@ -60,6 +60,12 @@ function AdminPage() {
             <FolderTree className="h-4 w-4 inline mr-2" /> Категории
           </button>
           <button
+            onClick={() => setTab("seo")}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px ${tab === "seo" ? "border-brand text-brand" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            <Search className="h-4 w-4 inline mr-2" /> SEO
+          </button>
+          <button
             onClick={() => setTab("orders")}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px ${tab === "orders" ? "border-brand text-brand" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
@@ -67,7 +73,7 @@ function AdminPage() {
           </button>
         </div>
 
-        {tab === "import" ? <ImportTab /> : tab === "categories" ? <CategoriesTab /> : <OrdersTab />}
+        {tab === "import" ? <ImportTab /> : tab === "categories" ? <CategoriesTab /> : tab === "seo" ? <SeoTab /> : <OrdersTab />}
       </div>
     </SiteLayout>
   );
