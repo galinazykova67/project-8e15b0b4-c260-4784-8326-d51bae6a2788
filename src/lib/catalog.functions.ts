@@ -20,7 +20,7 @@ export const getCategories = createServerFn({ method: "GET" }).handler(async () 
   const sb = publicClient();
   const { data, error } = await sb
     .from("categories")
-    .select("id, yml_id, parent_yml_id, name, slug, sort_order")
+    .select("id, yml_id, parent_yml_id, name, slug, sort_order, seo_title, seo_description")
     .eq("visible", true)
     .order("sort_order")
     .order("name");
