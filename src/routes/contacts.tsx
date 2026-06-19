@@ -2,17 +2,30 @@ import { createFileRoute } from "@tanstack/react-router";
 import { MapPin, Phone, Clock, Mail } from "lucide-react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { SITE } from "@/lib/site-config";
+import { getPageSeo } from "@/lib/seo.functions";
 
 export const Route = createFileRoute("/contacts")({
-  head: () => ({
-    meta: [
-      { title: "Контакты — Автоключ" },
-      { name: "description", content: `Магазин автотоваров Автоключ. ${SITE.address}. Телефон: ${SITE.phone}.` },
-      { property: "og:title", content: "Контакты — Автоключ" },
-      { property: "og:description", content: `${SITE.address}. ${SITE.phone}.` },
-    ],
-    links: [{ rel: "canonical", href: "/contacts" }],
-  }),
+  loader: async ({ context }) => {
+    const seo = await context.queryClient.ensureQueryData({
+      queryKey: ["page-seo", "/contacts"],
+      queryFn: () => getPageSeo({ data: { path: "/contacts" } }),
+    });
+    return { seo };
+  },
+  head: ({ loaderData }) => {
+    const seo = (loaderData as { seo?: { title: string | null; description: string | null } | null } | undefined)?.seo;
+    const title = seo?.title?.trim() || "Контакты — Автоключ";
+    const description = seo?.description?.trim() || `Магазин автотоваров Автоключ. ${SITE.address}. Телефон: ${SITE.phone}.`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: "/contacts" }],
+    };
+  },
   component: ContactsPage,
 });
 
