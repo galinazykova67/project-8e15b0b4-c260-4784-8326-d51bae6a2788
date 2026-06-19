@@ -15,12 +15,16 @@ export const Route = createFileRoute("/product/$slug")({
   head: ({ loaderData }) => {
     const p = loaderData?.product;
     if (!p) return { meta: [{ title: "Товар — Автоключ" }] };
+    const seoT = (p as { seo_title?: string | null }).seo_title?.trim();
+    const seoD = (p as { seo_description?: string | null }).seo_description?.trim();
+    const title = seoT || `${p.name} — Автоключ`;
+    const description = seoD || (p.description ?? p.name).slice(0, 160);
     return {
       meta: [
-        { title: `${p.name} — Автоключ` },
-        { name: "description", content: (p.description ?? p.name).slice(0, 160) },
-        { property: "og:title", content: p.name },
-        { property: "og:description", content: (p.description ?? p.name).slice(0, 160) },
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
         ...(p.pictures?.[0] ? [{ property: "og:image", content: p.pictures[0] }] : []),
       ],
       links: [{ rel: "canonical", href: `/product/${p.slug}` }],
