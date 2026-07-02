@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+
 import { Trash2, Minus, Plus, ShoppingBag } from "lucide-react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { useCart, formatPrice } from "@/lib/cart-store";
@@ -22,6 +23,7 @@ function CartPage() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ name: "", phone: "", email: "", comment: "" });
+  const [agree, setAgree] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ id: string } | null>(null);
 
@@ -30,6 +32,7 @@ function CartPage() {
     if (items.length === 0) return;
     if (form.name.trim().length < 2) return toast.error("Введите имя");
     if (form.phone.trim().length < 5) return toast.error("Введите телефон");
+    if (!agree) return toast.error("Необходимо согласие на обработку персональных данных");
 
     setSubmitting(true);
     try {
@@ -144,10 +147,24 @@ function CartPage() {
                 <div className="text-sm text-muted-foreground">Итого:</div>
                 <div className="text-2xl font-bold">{formatPrice(total)}</div>
               </div>
-              <button disabled={submitting} type="submit" className="w-full h-11 rounded-md btn-brand font-semibold disabled:opacity-50">
+              <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agree}
+                  onChange={(e) => setAgree(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-brand"
+                />
+                <span>
+                  Я согласен(-на) на обработку персональных данных и принимаю условия{" "}
+                  <Link to="/privacy" target="_blank" className="text-brand hover:underline">
+                    Политики конфиденциальности
+                  </Link>.
+                </span>
+              </label>
+              <button disabled={submitting || !agree} type="submit" className="w-full h-11 rounded-md btn-brand font-semibold disabled:opacity-50">
                 {submitting ? "Отправка..." : "Оформить заказ"}
               </button>
-              <p className="text-xs text-muted-foreground">Нажимая кнопку, вы соглашаетесь с обработкой персональных данных. Мы свяжемся с вами для подтверждения.</p>
+              <p className="text-xs text-muted-foreground">Мы свяжемся с вами для подтверждения заказа.</p>
             </form>
           </div>
         )}

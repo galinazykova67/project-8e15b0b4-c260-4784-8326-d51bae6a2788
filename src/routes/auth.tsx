@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +17,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [agree, setAgree] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -26,6 +27,10 @@ function AuthPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agree) {
+      toast.error("Необходимо согласие на обработку персональных данных");
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "signup") {
@@ -65,7 +70,22 @@ function AuthPage() {
               <label className="text-xs uppercase tracking-wider text-muted-foreground">Пароль</label>
               <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={6} className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background text-sm" />
             </div>
-            <button disabled={loading} className="w-full h-11 rounded-md btn-brand font-semibold disabled:opacity-50">
+            <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agree}
+                onChange={(e) => setAgree(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-brand"
+              />
+              <span>
+                Согласен(-на) с{" "}
+                <Link to="/privacy" target="_blank" className="text-brand hover:underline">
+                  Политикой конфиденциальности
+                </Link>{" "}
+                и обработкой персональных данных.
+              </span>
+            </label>
+            <button disabled={loading || !agree} className="w-full h-11 rounded-md btn-brand font-semibold disabled:opacity-50">
               {loading ? "..." : mode === "login" ? "Войти" : "Создать аккаунт"}
             </button>
           </form>

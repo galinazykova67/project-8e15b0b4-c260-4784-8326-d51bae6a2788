@@ -1,4 +1,5 @@
 import { MapPin, Phone, Clock, Mail } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { SITE } from "@/lib/site-config";
 
 function VkIcon({ className }: { className?: string }) {
@@ -37,8 +38,11 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-white/10">
-        <div className="container mx-auto px-4 py-4 text-xs opacity-70">
-          © {new Date().getFullYear()} {SITE.name}. Все права защищены.
+        <div className="container mx-auto px-4 py-4 text-xs opacity-70 flex flex-wrap items-center justify-between gap-2">
+          <div>© {new Date().getFullYear()} ООО «Автолайф». Все права защищены.</div>
+          <Link to="/privacy" className="hover:opacity-100 hover:underline">
+            Политика конфиденциальности
+          </Link>
         </div>
       </div>
     </footer>
