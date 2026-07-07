@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ShoppingCart } from "lucide-react";
 import { useCart, formatPrice } from "@/lib/cart-store";
+import { useMyDiscounts } from "@/hooks/use-my-discounts";
+import { applyDiscount, discountPercentFor } from "@/lib/discount-utils";
 
 export interface ProductCardData {
   id: string;
@@ -16,7 +18,11 @@ export interface ProductCardData {
 
 export function ProductCard({ p }: { p: ProductCardData }) {
   const add = useCart((s) => s.add);
+  const { map } = useMyDiscounts();
   const img = p.pictures[0];
+
+  const percent = discountPercentFor(p.vendor, map);
+  const finalPrice = applyDiscount(Number(p.price), p.vendor, map);
 
   return (
     <div className="group rounded-lg border border-border bg-card overflow-hidden flex flex-col hover:border-brand transition-colors">
@@ -29,6 +35,9 @@ export function ProductCard({ p }: { p: ProductCardData }) {
         {!p.available && (
           <div className="absolute top-2 left-2 px-2 py-0.5 text-[10px] uppercase rounded bg-muted text-muted-foreground">Нет в наличии</div>
         )}
+        {percent > 0 && (
+          <div className="absolute top-2 right-2 px-2 py-0.5 text-[10px] font-bold rounded bg-brand text-brand-foreground">−{percent}%</div>
+        )}
       </Link>
       <div className="p-3 flex flex-col flex-1 gap-2">
         {p.vendor && <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{p.vendor}</div>}
@@ -38,10 +47,12 @@ export function ProductCard({ p }: { p: ProductCardData }) {
         {p.vendor_code && <div className="text-xs text-muted-foreground">Артикул: <span className="font-mono">{p.vendor_code}</span></div>}
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <div>
-            <div className="font-bold text-base text-foreground">{formatPrice(p.price)}</div>
-            {p.old_price && p.old_price > p.price && (
+            <div className="font-bold text-base text-foreground">{formatPrice(finalPrice)}</div>
+            {percent > 0 ? (
+              <div className="text-xs text-muted-foreground line-through">{formatPrice(Number(p.price))}</div>
+            ) : p.old_price && p.old_price > p.price ? (
               <div className="text-xs text-muted-foreground line-through">{formatPrice(p.old_price)}</div>
-            )}
+            ) : null}
           </div>
           <button
             onClick={() =>
@@ -49,8 +60,9 @@ export function ProductCard({ p }: { p: ProductCardData }) {
                 product_id: p.id,
                 product_name: p.name,
                 slug: p.slug,
+                vendor: p.vendor ?? null,
                 vendor_code: p.vendor_code ?? null,
-                price: p.price,
+                price: Number(p.price),
                 picture: img ?? null,
               })
             }
