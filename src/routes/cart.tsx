@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Trash2, Minus, Plus, ShoppingBag } from "lucide-react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { useCart, formatPrice } from "@/lib/cart-store";
+import { useMyDiscounts } from "@/hooks/use-my-discounts";
+import { applyDiscount, discountPercentFor } from "@/lib/discount-utils";
 import { createOrder } from "@/lib/orders.functions";
 import { toast } from "sonner";
 
