@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, FileText, Loader2, Package, ShoppingBag, FolderTree, Search, RefreshCw } from "lucide-react";
+import { Upload, FileText, Loader2, Package, ShoppingBag, FolderTree, Search, RefreshCw, Percent } from "lucide-react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { CategoriesTab } from "@/components/admin/categories-tab";
 import { SeoTab } from "@/components/admin/seo-tab";
 import { SyncTab } from "@/components/admin/sync-tab";
+import { DiscountsTab } from "@/components/admin/discounts-tab";
 import { importYmlCatalog } from "@/lib/catalog.functions";
 import { listOrders, getOrderItems, updateOrderStatus } from "@/lib/orders.functions";
 import { useAuth } from "@/hooks/use-auth";
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminPage() {
   const { isAdmin, loading: authLoading, user } = useAuth();
-  const [tab, setTab] = useState<"import" | "sync" | "categories" | "seo" | "orders">("import");
+  const [tab, setTab] = useState<"import" | "sync" | "categories" | "seo" | "discounts" | "orders">("import");
 
   if (authLoading) {
     return (
@@ -73,6 +74,12 @@ function AdminPage() {
             <Search className="h-4 w-4 inline mr-2" /> SEO
           </button>
           <button
+            onClick={() => setTab("discounts")}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px ${tab === "discounts" ? "border-brand text-brand" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            <Percent className="h-4 w-4 inline mr-2" /> Скидки клиентам
+          </button>
+          <button
             onClick={() => setTab("orders")}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px ${tab === "orders" ? "border-brand text-brand" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
@@ -80,7 +87,7 @@ function AdminPage() {
           </button>
         </div>
 
-        {tab === "import" ? <ImportTab /> : tab === "sync" ? <SyncTab /> : tab === "categories" ? <CategoriesTab /> : tab === "seo" ? <SeoTab /> : <OrdersTab />}
+        {tab === "import" ? <ImportTab /> : tab === "sync" ? <SyncTab /> : tab === "categories" ? <CategoriesTab /> : tab === "seo" ? <SeoTab /> : tab === "discounts" ? <DiscountsTab /> : <OrdersTab />}
       </div>
     </SiteLayout>
   );
