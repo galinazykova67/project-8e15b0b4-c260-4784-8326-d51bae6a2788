@@ -124,7 +124,21 @@ function CartPage() {
                           <Plus className="h-3 w-3" />
                         </button>
                       </div>
-                      <div className="font-semibold">{formatPrice(it.price * it.quantity)}</div>
+                      {(() => {
+                        const pct = discountPercentFor(it.vendor, discountMap);
+                        const unit = applyDiscount(it.price, it.vendor, discountMap);
+                        return (
+                          <div className="text-right">
+                            <div className="font-semibold">{formatPrice(unit * it.quantity)}</div>
+                            {pct > 0 && (
+                              <div className="text-xs text-muted-foreground">
+                                <span className="line-through">{formatPrice(it.price * it.quantity)}</span>
+                                <span className="ml-1 text-brand">−{pct}%</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                       <button onClick={() => remove(it.product_id)} className="text-muted-foreground hover:text-destructive p-2">
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -153,9 +167,17 @@ function CartPage() {
                 <label className="text-xs uppercase tracking-wider text-muted-foreground">Комментарий</label>
                 <textarea value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} maxLength={1000} rows={3} className="mt-1 w-full px-3 py-2 rounded-md border border-input bg-background text-sm" />
               </div>
-              <div className="pt-3 border-t border-border flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">Итого:</div>
-                <div className="text-2xl font-bold">{formatPrice(total)}</div>
+              <div className="pt-3 border-t border-border space-y-1">
+                {totalDiscount > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="text-muted-foreground">Ваша скидка:</div>
+                    <div className="text-brand font-medium">−{formatPrice(totalDiscount)}</div>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">Итого:</div>
+                  <div className="text-2xl font-bold">{formatPrice(total)}</div>
+                </div>
               </div>
               <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer">
                 <input
