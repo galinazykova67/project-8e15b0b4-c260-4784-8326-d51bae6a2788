@@ -4,6 +4,8 @@ import { ShoppingCart, Check, Minus, Plus } from "lucide-react";
 import { SiteLayout } from "@/components/site/site-layout";
 import { getProduct } from "@/lib/catalog.functions";
 import { useCart, formatPrice } from "@/lib/cart-store";
+import { useMyDiscounts } from "@/hooks/use-my-discounts";
+import { applyDiscount, discountPercentFor } from "@/lib/discount-utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/product/$slug")({
@@ -80,9 +82,13 @@ function ProductPage() {
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const add = useCart((s) => s.add);
+  const { map } = useMyDiscounts();
 
   const pictures: string[] = product.pictures ?? [];
   const params = (product.params ?? {}) as Record<string, string>;
+  const basePrice = Number(product.price);
+  const percent = discountPercentFor(product.vendor, map);
+  const finalPrice = applyDiscount(basePrice, product.vendor, map);
 
   const handleAdd = () => {
     add(
@@ -90,8 +96,9 @@ function ProductPage() {
         product_id: product.id,
         product_name: product.name,
         slug: product.slug,
+        vendor: product.vendor ?? null,
         vendor_code: product.vendor_code,
-        price: Number(product.price),
+        price: basePrice,
         picture: pictures[0] ?? null,
       },
       qty,
@@ -149,11 +156,16 @@ function ProductPage() {
               )}
             </div>
 
-            <div className="flex items-end gap-4 mb-6">
-              <div className="text-4xl font-extrabold">{formatPrice(Number(product.price))}</div>
-              {product.old_price && Number(product.old_price) > Number(product.price) && (
+            <div className="flex items-end gap-4 mb-6 flex-wrap">
+              <div className="text-4xl font-extrabold">{formatPrice(finalPrice)}</div>
+              {percent > 0 ? (
+                <>
+                  <div className="text-lg text-muted-foreground line-through pb-1">{formatPrice(basePrice)}</div>
+                  <div className="px-2 py-1 text-xs font-bold rounded bg-brand text-brand-foreground">Ваша скидка −{percent}%</div>
+                </>
+              ) : product.old_price && Number(product.old_price) > basePrice ? (
                 <div className="text-lg text-muted-foreground line-through pb-1">{formatPrice(Number(product.old_price))}</div>
-              )}
+              ) : null}
             </div>
 
             <div className="flex items-center gap-3 mb-6">

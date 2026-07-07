@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -23,40 +24,59 @@ export const createOrder = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    // Optional auth: if the caller is signed-in, fetch their per-brand discounts
+    // and apply them to the server-recomputed prices — so guests pay list price
+    // and signed-in customers get their negotiated discount automatically.
+    let userId: string | null = null;
+    try {
+      const req = getRequest();
+      const authHeader = req?.headers.get("authorization");
+      if (authHeader?.startsWith("Bearer ")) {
+        const token = authHeader.slice(7);
+        const { data: claims } = await supabaseAdmin.auth.getClaims(token);
+        userId = claims?.claims?.sub ?? null;
+      }
+    } catch {
+      userId = null;
+    }
+
+    let discountMap: Record<string, number> = {};
+    if (userId) {
+      const { data: discounts } = await supabaseAdmin
+        .from("customer_discounts")
+        .select("vendor, percent")
+        .eq("user_id", userId);
+      for (const d of discounts ?? []) {
+        discountMap[d.vendor.trim().toLowerCase()] = Number(d.percent);
+      }
+    }
+
     // recompute total and validate availability from DB to avoid client tampering
     const ids = data.items.map((i) => i.product_id);
     const { data: dbProducts, error: prodErr } = await supabaseAdmin
       .from("products")
-      .select("id, name, price, vendor_code, available, visible")
+      .select("id, name, price, vendor, vendor_code, available, visible")
       .in("id", ids);
     if (prodErr) throw new Error(prodErr.message);
 
     const byId = new Map((dbProducts ?? []).map((p) => [p.id, p]));
 
-    // Validate every item exists, is visible, and is available
     const unavailable: string[] = [];
     const missing: string[] = [];
     for (const it of data.items) {
       const p = byId.get(it.product_id);
-      if (!p) {
-        missing.push(it.product_name);
-        continue;
-      }
-      if (!p.visible || !p.available) {
-        unavailable.push(p.name);
-      }
+      if (!p) { missing.push(it.product_name); continue; }
+      if (!p.visible || !p.available) unavailable.push(p.name);
     }
-    if (missing.length > 0) {
-      throw new Error(`Товары не найдены: ${missing.join(", ")}`);
-    }
-    if (unavailable.length > 0) {
-      throw new Error(`Нет в наличии: ${unavailable.join(", ")}. Удалите их из корзины.`);
-    }
+    if (missing.length > 0) throw new Error(`Товары не найдены: ${missing.join(", ")}`);
+    if (unavailable.length > 0) throw new Error(`Нет в наличии: ${unavailable.join(", ")}. Удалите их из корзины.`);
 
     let total = 0;
     const itemsToInsert = data.items.map((it) => {
       const p = byId.get(it.product_id)!;
-      const price = Number(p.price);
+      const base = Number(p.price);
+      const pct = p.vendor ? discountMap[p.vendor.trim().toLowerCase()] ?? 0 : 0;
+      const price = pct > 0 ? Math.round(base * (100 - pct)) / 100 : base;
       total += price * it.quantity;
       return {
         product_id: it.product_id,
