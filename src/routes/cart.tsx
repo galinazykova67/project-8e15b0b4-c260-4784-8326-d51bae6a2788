@@ -18,11 +18,19 @@ export const Route = createFileRoute("/cart")({
 
 function CartPage() {
   const items = useCart((s) => s.items);
-  const total = useCart((s) => s.total());
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
   const clear = useCart((s) => s.clear);
   const navigate = useNavigate();
+  const { map: discountMap } = useMyDiscounts();
+  const total = items.reduce(
+    (sum, i) => sum + applyDiscount(i.price, i.vendor, discountMap) * i.quantity,
+    0,
+  );
+  const totalDiscount = items.reduce(
+    (sum, i) => sum + (i.price - applyDiscount(i.price, i.vendor, discountMap)) * i.quantity,
+    0,
+  );
 
   const [form, setForm] = useState({ name: "", phone: "", email: "", comment: "" });
   const [agree, setAgree] = useState(false);
