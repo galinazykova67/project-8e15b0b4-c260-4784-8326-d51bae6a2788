@@ -56,6 +56,33 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_discounts: {
+        Row: {
+          created_at: string
+          id: string
+          percent: number
+          updated_at: string
+          user_id: string
+          vendor: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          percent: number
+          updated_at?: string
+          user_id: string
+          vendor: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          percent?: number
+          updated_at?: string
+          user_id?: string
+          vendor?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
