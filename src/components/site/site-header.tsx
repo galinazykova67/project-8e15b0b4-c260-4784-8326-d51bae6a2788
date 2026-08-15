@@ -57,7 +57,7 @@ export function SiteHeader() {
             href={SITE.phoneHref}
             target="_top"
             rel="noopener"
-            className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-accent text-foreground"
+            className="inline-flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-md hover:bg-accent text-foreground shrink-0"
             title={SITE.phone}
             aria-label="Позвонить"
           >
@@ -67,7 +67,7 @@ export function SiteHeader() {
             href={SITE.vk}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-accent text-foreground"
+            className="inline-flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-md hover:bg-accent text-foreground shrink-0"
             title="ВКонтакте"
             aria-label="Группа ВКонтакте"
           >
@@ -84,13 +84,13 @@ export function SiteHeader() {
           {user ? (
             <button
               onClick={() => supabase.auth.signOut()}
-              className="inline-flex items-center gap-1.5 px-3 h-10 text-sm rounded-md hover:bg-accent"
+              className="inline-flex items-center gap-1.5 px-2 sm:px-3 h-9 sm:h-10 text-sm rounded-md hover:bg-accent shrink-0"
               title="Выйти"
             >
               <LogOut className="h-4 w-4" />
             </button>
           ) : (
-            <Link to="/auth" className="inline-flex items-center gap-1.5 px-3 h-10 text-sm rounded-md hover:bg-accent">
+            <Link to="/auth" className="inline-flex items-center gap-1.5 px-2 sm:px-3 h-9 sm:h-10 text-sm rounded-md hover:bg-accent shrink-0">
               <User className="h-4 w-4" />
             <span className="hidden sm:inline">Войти</span>
             </Link>
