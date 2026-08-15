@@ -39,21 +39,22 @@ export function ProductCard({ p }: { p: ProductCardData }) {
           <div className="absolute top-2 right-2 px-2 py-0.5 text-[10px] font-bold rounded bg-brand text-brand-foreground">−{percent}%</div>
         )}
       </Link>
-      <div className="p-3 flex flex-col flex-1 gap-2">
-        {p.vendor && <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{p.vendor}</div>}
-        <Link to="/product/$slug" params={{ slug: p.slug }} className="font-medium text-sm leading-snug line-clamp-2 hover:text-brand">
+      <div className="p-2.5 sm:p-3 flex flex-col flex-1 gap-2 min-w-0">
+        {p.vendor && <div className="text-[11px] uppercase tracking-wide text-muted-foreground truncate">{p.vendor}</div>}
+        <Link to="/product/$slug" params={{ slug: p.slug }} className="font-medium text-sm leading-snug line-clamp-2 hover:text-brand break-words [overflow-wrap:anywhere]">
           {p.name}
         </Link>
-        {p.vendor_code && <div className="text-xs text-muted-foreground">Артикул: <span className="font-mono">{p.vendor_code}</span></div>}
-        <div className="mt-auto flex items-end justify-between gap-2 pt-2">
-          <div>
-            <div className="font-bold text-base text-foreground">{formatPrice(finalPrice)}</div>
+        {p.vendor_code && <div className="text-xs text-muted-foreground truncate">Артикул: <span className="font-mono">{p.vendor_code}</span></div>}
+        <div className="mt-auto flex items-end justify-between gap-2 pt-2 min-w-0">
+          <div className="min-w-0">
+            <div className="font-bold text-sm sm:text-base text-foreground break-words">{formatPrice(finalPrice)}</div>
             {percent > 0 ? (
               <div className="text-xs text-muted-foreground line-through">{formatPrice(Number(p.price))}</div>
             ) : p.old_price && p.old_price > p.price ? (
               <div className="text-xs text-muted-foreground line-through">{formatPrice(p.old_price)}</div>
             ) : null}
           </div>
+
           <button
             onClick={() =>
               add({

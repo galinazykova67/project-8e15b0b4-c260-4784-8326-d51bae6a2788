@@ -39,24 +39,25 @@ export function SiteHeader() {
       </div>
 
       {/* main bar */}
-      <div className="container mx-auto px-4 py-4 flex items-center gap-4 lg:gap-8">
-        <Link to="/" className="flex items-center shrink-0" aria-label={SITE.name}>
+      <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-2 sm:gap-4 lg:gap-8 min-w-0">
+        <Link to="/" className="flex items-center min-w-0" aria-label={SITE.name}>
           <img
             src={logoAsset.url}
             alt={SITE.name}
-            className="h-10 sm:h-12 w-auto"
+            className="h-8 sm:h-12 w-auto max-w-[42vw] object-contain"
             loading="eager"
           />
         </Link>
 
         <SearchBox className="flex-1 max-w-2xl hidden md:block" />
 
-        <nav className="flex items-center gap-1 sm:gap-2 ml-auto md:ml-0">
+        <nav className="flex items-center gap-0.5 sm:gap-2 ml-auto md:ml-0 shrink-0">
+
           <a
             href={SITE.phoneHref}
             target="_top"
             rel="noopener"
-            className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-accent text-foreground"
+            className="inline-flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-md hover:bg-accent text-foreground shrink-0"
             title={SITE.phone}
             aria-label="Позвонить"
           >
@@ -66,7 +67,7 @@ export function SiteHeader() {
             href={SITE.vk}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-accent text-foreground"
+            className="inline-flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-md hover:bg-accent text-foreground shrink-0"
             title="ВКонтакте"
             aria-label="Группа ВКонтакте"
           >
@@ -83,13 +84,13 @@ export function SiteHeader() {
           {user ? (
             <button
               onClick={() => supabase.auth.signOut()}
-              className="inline-flex items-center gap-1.5 px-3 h-10 text-sm rounded-md hover:bg-accent"
+              className="inline-flex items-center gap-1.5 px-2 sm:px-3 h-9 sm:h-10 text-sm rounded-md hover:bg-accent shrink-0"
               title="Выйти"
             >
               <LogOut className="h-4 w-4" />
             </button>
           ) : (
-            <Link to="/auth" className="inline-flex items-center gap-1.5 px-3 h-10 text-sm rounded-md hover:bg-accent">
+            <Link to="/auth" className="inline-flex items-center gap-1.5 px-2 sm:px-3 h-9 sm:h-10 text-sm rounded-md hover:bg-accent shrink-0">
               <User className="h-4 w-4" />
             <span className="hidden sm:inline">Войти</span>
             </Link>

@@ -108,14 +108,15 @@ function ProductPage() {
 
   return (
     <SiteLayout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8 overflow-x-hidden">
         <div className="text-sm text-muted-foreground mb-4">
           <Link to="/" className="hover:text-brand">Главная</Link>
           {" / "}
           <Link to="/catalog" className="hover:text-brand">Каталог</Link>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 min-w-0">
+
           {/* IMAGES */}
           <div>
             <div className="aspect-square rounded-lg border border-border bg-surface overflow-hidden grid place-items-center">
@@ -141,10 +142,11 @@ function ProductPage() {
           </div>
 
           {/* INFO */}
-          <div>
+          <div className="min-w-0">
             {product.vendor && <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{product.vendor}</div>}
-            <h1 className="text-2xl lg:text-3xl font-bold mb-3">{product.name}</h1>
-            {product.vendor_code && <div className="text-sm text-muted-foreground mb-4">Артикул: <span className="font-mono">{product.vendor_code}</span></div>}
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 break-words [overflow-wrap:anywhere]">{product.name}</h1>
+            {product.vendor_code && <div className="text-sm text-muted-foreground mb-4 break-words">Артикул: <span className="font-mono break-all">{product.vendor_code}</span></div>}
+
 
             <div className="flex items-center gap-2 mb-6">
               {product.available ? (
@@ -156,8 +158,9 @@ function ProductPage() {
               )}
             </div>
 
-            <div className="flex items-end gap-4 mb-6 flex-wrap">
-              <div className="text-4xl font-extrabold">{formatPrice(finalPrice)}</div>
+            <div className="flex items-end gap-3 sm:gap-4 mb-6 flex-wrap">
+              <div className="text-3xl sm:text-4xl font-extrabold">{formatPrice(finalPrice)}</div>
+
               {percent > 0 ? (
                 <>
                   <div className="text-lg text-muted-foreground line-through pb-1">{formatPrice(basePrice)}</div>
@@ -168,8 +171,8 @@ function ProductPage() {
               ) : null}
             </div>
 
-            <div className="flex items-center gap-3 mb-6">
-              <div className="inline-flex items-center border border-input rounded-md">
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <div className="inline-flex items-center border border-input rounded-md shrink-0">
                 <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="h-11 w-11 grid place-items-center hover:bg-accent">
                   <Minus className="h-4 w-4" />
                 </button>
@@ -186,16 +189,17 @@ function ProductPage() {
               <button
                 onClick={handleAdd}
                 disabled={!product.available}
-                className="flex-1 h-11 rounded-md btn-brand font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 min-w-[10rem] h-11 rounded-md btn-brand font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <ShoppingCart className="h-4 w-4" /> В корзину
               </button>
             </div>
 
+
             {product.description && (
               <div className="prose prose-sm max-w-none mb-6">
                 <h3 className="font-semibold mb-2">Описание</h3>
-                <p className="text-sm text-muted-foreground whitespace-pre-line">{product.description}</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-line break-words">{product.description}</p>
               </div>
             )}
 
@@ -204,14 +208,15 @@ function ProductPage() {
                 <h3 className="font-semibold mb-2">Характеристики</h3>
                 <dl className="divide-y divide-border border border-border rounded-md text-sm">
                   {Object.entries(params).map(([k, v]) => (
-                    <div key={k} className="flex justify-between gap-4 px-4 py-2">
-                      <dt className="text-muted-foreground">{k}</dt>
-                      <dd className="font-medium text-right">{v}</dd>
+                    <div key={k} className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4 px-3 sm:px-4 py-2">
+                      <dt className="text-muted-foreground break-words">{k}</dt>
+                      <dd className="font-medium sm:text-right break-words">{v}</dd>
                     </div>
                   ))}
                 </dl>
               </div>
             )}
+
           </div>
         </div>
       </div>

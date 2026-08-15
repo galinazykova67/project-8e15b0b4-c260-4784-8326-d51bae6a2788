@@ -64,15 +64,42 @@ function CatalogPage() {
   const topCats = (cats ?? []).filter((c) => !c.parent_yml_id);
   const totalPages = data ? Math.max(1, Math.ceil(data.total / 24)) : 1;
 
+  const catLinks = (
+    <>
+      <Link
+        to="/catalog"
+        search={{ page: 1, sort: search.sort }}
+        className="block text-sm px-3 py-2 lg:py-1.5 rounded hover:bg-accent font-medium"
+        activeProps={{ className: "block text-sm px-3 py-2 lg:py-1.5 rounded bg-accent text-brand font-medium" }}
+        activeOptions={{ exact: true }}
+      >
+        Все товары
+      </Link>
+      {topCats.map((c) => (
+        <Link
+          key={c.id}
+          to="/catalog/$slug"
+          params={{ slug: c.slug }}
+          search={{ page: 1, sort: search.sort }}
+          className="block text-sm px-3 py-2 lg:py-1.5 rounded hover:bg-accent"
+          activeProps={{ className: "block text-sm px-3 py-2 lg:py-1.5 rounded bg-accent text-brand font-medium" }}
+        >
+          {c.name}
+        </Link>
+      ))}
+    </>
+  );
+
+
   return (
     <SiteLayout>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-2">Каталог</h1>
+      <div className="container mx-auto px-4 py-6 sm:py-8 overflow-x-hidden">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Каталог</h1>
         <p className="text-muted-foreground mb-6">{data?.total ?? 0} товаров</p>
 
-        <div className="grid lg:grid-cols-[260px_1fr] gap-6">
+        <div className="grid lg:grid-cols-[260px_1fr] gap-6 min-w-0">
           {/* SIDEBAR */}
-          <aside className="space-y-6">
+          <aside className="space-y-4 lg:space-y-6 min-w-0">
             <form onSubmit={onSearch} className="space-y-2">
               <label className="text-xs uppercase tracking-wider text-muted-foreground">Поиск</label>
               <input
@@ -84,33 +111,21 @@ function CatalogPage() {
               <button className="w-full h-10 rounded-md btn-brand text-sm font-medium">Найти</button>
             </form>
 
-            <div>
+            <details className="group rounded-md border border-border lg:hidden">
+              <summary className="list-none cursor-pointer select-none px-3 h-11 flex items-center justify-between text-sm font-medium">
+                Категории
+                <span className="text-muted-foreground group-open:rotate-180 transition-transform">▾</span>
+              </summary>
+              <div className="space-y-1 px-2 pb-2 max-h-[60vh] overflow-y-auto">{catLinks}</div>
+            </details>
+
+            <div className="hidden lg:block">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Категории</div>
-              <div className="space-y-1">
-                <Link
-                  to="/catalog"
-                  search={{ page: 1, sort: search.sort }}
-                  className="block text-sm px-3 py-1.5 rounded hover:bg-accent font-medium"
-                  activeProps={{ className: "block text-sm px-3 py-1.5 rounded bg-accent text-brand font-medium" }}
-                  activeOptions={{ exact: true }}
-                >
-                  Все товары
-                </Link>
-                {topCats.map((c) => (
-                  <Link
-                    key={c.id}
-                    to="/catalog/$slug"
-                    params={{ slug: c.slug }}
-                    search={{ page: 1, sort: search.sort }}
-                    className="block text-sm px-3 py-1.5 rounded hover:bg-accent"
-                    activeProps={{ className: "block text-sm px-3 py-1.5 rounded bg-accent text-brand font-medium" }}
-                  >
-                    {c.name}
-                  </Link>
-                ))}
-              </div>
+              <div className="space-y-1">{catLinks}</div>
             </div>
+
           </aside>
+
 
           {/* GRID */}
           <div>

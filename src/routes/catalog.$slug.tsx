@@ -84,7 +84,7 @@ function CategoryPage() {
 
   return (
     <SiteLayout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8 overflow-x-hidden">
         <nav className="text-sm text-muted-foreground mb-2 flex flex-wrap items-center gap-1">
           <Link to="/" className="hover:text-brand">Главная</Link>
           <ChevronRight className="h-3 w-3" />
@@ -96,24 +96,25 @@ function CategoryPage() {
             </span>
           ))}
         </nav>
-        <h1 className="text-3xl font-bold mb-2">{category.name}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">{category.name}</h1>
         <p className="text-muted-foreground mb-6">{data?.total ?? 0} товаров</p>
 
         {subcategories.length > 0 && (
           <div className="mb-8">
             <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Подкатегории</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               {subcategories.map((s) => (
                 <Link
                   key={s.id}
                   to="/catalog/$slug"
                   params={{ slug: s.slug }}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-brand hover:bg-accent transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-brand hover:bg-accent transition-colors min-w-0"
                 >
                   <FolderOpen className="h-5 w-5 text-brand shrink-0" />
-                  <span className="text-sm font-medium line-clamp-2">{s.name}</span>
+                  <span className="text-sm font-medium line-clamp-2 min-w-0 break-words">{s.name}</span>
                 </Link>
               ))}
+
             </div>
           </div>
         )}
