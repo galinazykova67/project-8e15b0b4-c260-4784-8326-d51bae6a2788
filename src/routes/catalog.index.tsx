@@ -64,6 +64,33 @@ function CatalogPage() {
   const topCats = (cats ?? []).filter((c) => !c.parent_yml_id);
   const totalPages = data ? Math.max(1, Math.ceil(data.total / 24)) : 1;
 
+  const catLinks = (
+    <>
+      <Link
+        to="/catalog"
+        search={{ page: 1, sort: search.sort }}
+        className="block text-sm px-3 py-2 lg:py-1.5 rounded hover:bg-accent font-medium"
+        activeProps={{ className: "block text-sm px-3 py-2 lg:py-1.5 rounded bg-accent text-brand font-medium" }}
+        activeOptions={{ exact: true }}
+      >
+        Все товары
+      </Link>
+      {topCats.map((c) => (
+        <Link
+          key={c.id}
+          to="/catalog/$slug"
+          params={{ slug: c.slug }}
+          search={{ page: 1, sort: search.sort }}
+          className="block text-sm px-3 py-2 lg:py-1.5 rounded hover:bg-accent"
+          activeProps={{ className: "block text-sm px-3 py-2 lg:py-1.5 rounded bg-accent text-brand font-medium" }}
+        >
+          {c.name}
+        </Link>
+      ))}
+    </>
+  );
+
+
   return (
     <SiteLayout>
       <div className="container mx-auto px-4 py-6 sm:py-8 overflow-x-hidden">
