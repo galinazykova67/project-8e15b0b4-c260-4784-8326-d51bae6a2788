@@ -84,36 +84,19 @@ function CatalogPage() {
               <button className="w-full h-10 rounded-md btn-brand text-sm font-medium">Найти</button>
             </form>
 
-            <details className="group rounded-md border border-border lg:border-0 lg:open" open={false}>
-              <summary className="lg:hidden list-none cursor-pointer select-none px-3 h-11 flex items-center justify-between text-sm font-medium">
+            <details className="group rounded-md border border-border lg:hidden">
+              <summary className="list-none cursor-pointer select-none px-3 h-11 flex items-center justify-between text-sm font-medium">
                 Категории
                 <span className="text-muted-foreground group-open:rotate-180 transition-transform">▾</span>
               </summary>
-              <div className="hidden lg:block text-xs uppercase tracking-wider text-muted-foreground mb-2">Категории</div>
-              <div className="space-y-1 px-2 pb-2 lg:px-0 lg:pb-0 max-h-[60vh] overflow-y-auto lg:max-h-none lg:overflow-visible">
-                <Link
-                  to="/catalog"
-                  search={{ page: 1, sort: search.sort }}
-                  className="block text-sm px-3 py-2 lg:py-1.5 rounded hover:bg-accent font-medium"
-                  activeProps={{ className: "block text-sm px-3 py-2 lg:py-1.5 rounded bg-accent text-brand font-medium" }}
-                  activeOptions={{ exact: true }}
-                >
-                  Все товары
-                </Link>
-                {topCats.map((c) => (
-                  <Link
-                    key={c.id}
-                    to="/catalog/$slug"
-                    params={{ slug: c.slug }}
-                    search={{ page: 1, sort: search.sort }}
-                    className="block text-sm px-3 py-2 lg:py-1.5 rounded hover:bg-accent"
-                    activeProps={{ className: "block text-sm px-3 py-2 lg:py-1.5 rounded bg-accent text-brand font-medium" }}
-                  >
-                    {c.name}
-                  </Link>
-                ))}
-              </div>
+              <div className="space-y-1 px-2 pb-2 max-h-[60vh] overflow-y-auto">{catLinks}</div>
             </details>
+
+            <div className="hidden lg:block">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Категории</div>
+              <div className="space-y-1">{catLinks}</div>
+            </div>
+
           </aside>
 
 
