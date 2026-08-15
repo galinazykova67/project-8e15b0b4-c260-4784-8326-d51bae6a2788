@@ -115,7 +115,7 @@ function ProductPage() {
           <Link to="/catalog" className="hover:text-brand">Каталог</Link>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 min-w-0">
+        <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-6 lg:gap-8">
 
           {/* IMAGES */}
           <div>
