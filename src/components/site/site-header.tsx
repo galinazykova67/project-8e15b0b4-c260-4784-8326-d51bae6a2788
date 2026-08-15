@@ -39,19 +39,20 @@ export function SiteHeader() {
       </div>
 
       {/* main bar */}
-      <div className="container mx-auto px-4 py-4 flex items-center gap-4 lg:gap-8">
-        <Link to="/" className="flex items-center shrink-0" aria-label={SITE.name}>
+      <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-2 sm:gap-4 lg:gap-8 min-w-0">
+        <Link to="/" className="flex items-center min-w-0" aria-label={SITE.name}>
           <img
             src={logoAsset.url}
             alt={SITE.name}
-            className="h-10 sm:h-12 w-auto"
+            className="h-8 sm:h-12 w-auto max-w-[42vw] object-contain"
             loading="eager"
           />
         </Link>
 
         <SearchBox className="flex-1 max-w-2xl hidden md:block" />
 
-        <nav className="flex items-center gap-1 sm:gap-2 ml-auto md:ml-0">
+        <nav className="flex items-center gap-0.5 sm:gap-2 ml-auto md:ml-0 shrink-0">
+
           <a
             href={SITE.phoneHref}
             target="_top"
