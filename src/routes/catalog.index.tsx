@@ -97,7 +97,7 @@ function CatalogPage() {
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">Каталог</h1>
         <p className="text-muted-foreground mb-6">{data?.total ?? 0} товаров</p>
 
-        <div className="grid lg:grid-cols-[260px_1fr] gap-6 min-w-0">
+        <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[260px_minmax(0,1fr)] gap-6">
           {/* SIDEBAR */}
           <aside className="space-y-4 lg:space-y-6 min-w-0">
             <form onSubmit={onSearch} className="space-y-2">

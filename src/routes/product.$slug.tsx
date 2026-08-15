@@ -115,7 +115,7 @@ function ProductPage() {
           <Link to="/catalog" className="hover:text-brand">Каталог</Link>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 min-w-0">
+        <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-6 lg:gap-8">
 
           {/* IMAGES */}
           <div>
@@ -127,7 +127,7 @@ function ProductPage() {
               )}
             </div>
             {pictures.length > 1 && (
-              <div className="mt-3 flex gap-2 overflow-x-auto">
+              <div className="mt-3 flex gap-2 overflow-x-auto min-w-0 pb-1">
                 {pictures.map((src, i) => (
                   <button
                     key={i}
