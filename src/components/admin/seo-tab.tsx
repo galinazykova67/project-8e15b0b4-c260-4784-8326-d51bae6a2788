@@ -334,6 +334,14 @@ function ProductsSeo() {
   return (
     <div>
       <BulkGenerateBar kind="product" invalidateKeys={["seo-products"]} />
+      <SelectionBar
+        kind="product"
+        selected={selected}
+        clear={() => setSelected(new Set())}
+        selectAll={() => setSelected(new Set((data?.items ?? []).map((p) => p.id)))}
+        pageCount={(data?.items ?? []).length}
+        invalidateKeys={["seo-products"]}
+      />
       <form
         onSubmit={(e) => { e.preventDefault(); setPage(1); setSearchQ(search); }}
         className="mb-4 flex flex-wrap gap-2 items-center"
