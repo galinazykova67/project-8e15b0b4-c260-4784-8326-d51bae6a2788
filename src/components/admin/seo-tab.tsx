@@ -264,16 +264,25 @@ function CategoriesSeo() {
           const hasSeo = c.seo_title || c.seo_description;
           return (
             <div key={c.id}>
-              <button
-                onClick={() => setOpenId(isOpen ? null : c.id)}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent/50 text-left"
-              >
-                <span className="flex-1 text-sm font-medium">{c.name}</span>
-                <span className={`text-xs px-2 py-0.5 rounded ${hasSeo ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-muted text-muted-foreground"}`}>
-                  {hasSeo ? "SEO задан" : "Нет SEO"}
-                </span>
-                <span className="text-xs text-muted-foreground font-mono hidden sm:inline">/{c.slug}</span>
-              </button>
+              <div className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent/50">
+                <input
+                  type="checkbox"
+                  checked={selected.has(c.id)}
+                  onChange={() => toggle(c.id)}
+                  className="h-4 w-4 shrink-0"
+                  aria-label={`Выбрать ${c.name}`}
+                />
+                <button
+                  onClick={() => setOpenId(isOpen ? null : c.id)}
+                  className="flex-1 min-w-0 flex items-center gap-3 text-left"
+                >
+                  <span className="flex-1 text-sm font-medium">{c.name}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded ${hasSeo ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-muted text-muted-foreground"}`}>
+                    {hasSeo ? "SEO задан" : "Нет SEO"}
+                  </span>
+                  <span className="text-xs text-muted-foreground font-mono hidden sm:inline">/{c.slug}</span>
+                </button>
+              </div>
               {isOpen && (
                 <div className="px-4 py-4 bg-muted/30">
                   <SeoEditor
