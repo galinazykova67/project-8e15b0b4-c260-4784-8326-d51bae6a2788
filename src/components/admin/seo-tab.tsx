@@ -221,6 +221,77 @@ function BulkGenerateBar({ kind, invalidateKeys }: { kind: "category" | "product
   );
 }
 
+// ------- Selected items generation -------
+function SelectionBar({
+  kind,
+  selected,
+  clear,
+  selectAll,
+  pageCount,
+  invalidateKeys,
+}: {
+  kind: "category" | "product";
+  selected: Set<string>;
+  clear: () => void;
+  selectAll: () => void;
+  pageCount: number;
+  invalidateKeys: string[];
+}) {
+  const qc = useQueryClient();
+  const [running, setRunning] = useState(false);
+  const [done, setDone] = useState(0);
+  const count = selected.size;
+
+  const run = async () => {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    if (!confirm(`Сгенерировать SEO для ${ids.length} выбранных? Существующие значения будут перезаписаны.`)) return;
+    setRunning(true);
+    setDone(0);
+    let ok = 0;
+    let failed = 0;
+    try {
+      for (let i = 0; i < ids.length; i += 5) {
+        const chunk = ids.slice(i, i + 5);
+        const r = await adminGenerateSeoForIds({ data: { kind, ids: chunk } });
+        ok += r.processed;
+        failed += r.failed;
+        setDone(ok + failed);
+      }
+      toast.success(`Готово: ${ok}${failed ? `, ошибок: ${failed}` : ""}`);
+      clear();
+    } catch (e) {
+      toast.error("Ошибка генерации", { description: (e as Error).message });
+    } finally {
+      setRunning(false);
+      for (const k of invalidateKeys) qc.invalidateQueries({ queryKey: [k] });
+    }
+  };
+
+  return (
+    <div className="mb-4 rounded-lg border border-border bg-card p-3 flex items-center gap-3 flex-wrap">
+      <div className="text-sm flex-1 min-w-[180px]">
+        Выбрано: <span className="font-semibold">{count}</span>
+        {running && <span className="text-muted-foreground"> · обработано {done}/{count}</span>}
+      </div>
+      <button onClick={selectAll} disabled={running || pageCount === 0} className="h-9 px-3 rounded-md border border-border text-sm hover:bg-accent disabled:opacity-50">
+        Выбрать все на странице
+      </button>
+      <button onClick={clear} disabled={running || count === 0} className="h-9 px-3 rounded-md border border-border text-sm hover:bg-accent disabled:opacity-50">
+        Снять выбор
+      </button>
+      <button
+        onClick={run}
+        disabled={running || count === 0}
+        className="inline-flex items-center gap-2 h-9 px-4 rounded-md btn-brand text-sm font-medium disabled:opacity-50"
+      >
+        {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckSquare className="h-4 w-4" />}
+        Сгенерировать выбранные
+      </button>
+    </div>
+  );
+}
+
 // ------- Categories -------
 function CategoriesSeo() {
   const qc = useQueryClient();
