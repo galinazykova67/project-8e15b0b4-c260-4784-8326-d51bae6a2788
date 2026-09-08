@@ -226,6 +226,13 @@ function CategoriesSeo() {
   const qc = useQueryClient();
   const [filter, setFilter] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggle = (id: string) =>
+    setSelected((s) => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
   const { data, isLoading } = useQuery({ queryKey: ["seo-categories"], queryFn: () => adminListSeoCategories() });
 
   const saveMut = useMutation({
