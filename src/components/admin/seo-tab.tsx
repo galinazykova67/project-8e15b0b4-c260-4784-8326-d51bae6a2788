@@ -307,6 +307,13 @@ function ProductsSeo() {
   const [page, setPage] = useState(1);
   const [onlyMissing, setOnlyMissing] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggle = (id: string) =>
+    setSelected((s) => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
   const pageSize = 20;
 
   const { data, isLoading } = useQuery({
