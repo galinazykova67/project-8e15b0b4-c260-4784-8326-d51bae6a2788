@@ -371,18 +371,27 @@ function ProductsSeo() {
               const hasSeo = p.seo_title || p.seo_description;
               return (
                 <div key={p.id}>
-                  <button
-                    onClick={() => setOpenId(isOpen ? null : p.id)}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent/50 text-left"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate">{p.name}</div>
-                      <div className="text-xs text-muted-foreground">{p.vendor ?? ""} {p.vendor_code ? `· арт. ${p.vendor_code}` : ""}</div>
-                    </div>
-                    <span className={`text-xs px-2 py-0.5 rounded shrink-0 ${hasSeo ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-muted text-muted-foreground"}`}>
-                      {hasSeo ? "SEO задан" : "Нет SEO"}
-                    </span>
-                  </button>
+                  <div className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent/50">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(p.id)}
+                      onChange={() => toggle(p.id)}
+                      className="h-4 w-4 shrink-0"
+                      aria-label={`Выбрать ${p.name}`}
+                    />
+                    <button
+                      onClick={() => setOpenId(isOpen ? null : p.id)}
+                      className="flex-1 min-w-0 flex items-center gap-3 text-left"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{p.name}</div>
+                        <div className="text-xs text-muted-foreground">{p.vendor ?? ""} {p.vendor_code ? `· арт. ${p.vendor_code}` : ""}</div>
+                      </div>
+                      <span className={`text-xs px-2 py-0.5 rounded shrink-0 ${hasSeo ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-muted text-muted-foreground"}`}>
+                        {hasSeo ? "SEO задан" : "Нет SEO"}
+                      </span>
+                    </button>
+                  </div>
                   {isOpen && (
                     <div className="px-4 py-4 bg-muted/30">
                       <SeoEditor
