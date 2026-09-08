@@ -249,6 +249,14 @@ function CategoriesSeo() {
   return (
     <div>
       <BulkGenerateBar kind="category" invalidateKeys={["seo-categories"]} />
+      <SelectionBar
+        kind="category"
+        selected={selected}
+        clear={() => setSelected(new Set())}
+        selectAll={() => setSelected(new Set(items.slice(0, 200).map((c) => c.id)))}
+        pageCount={Math.min(200, items.length)}
+        invalidateKeys={["seo-categories"]}
+      />
       <div className="mb-4 relative">
         <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input
