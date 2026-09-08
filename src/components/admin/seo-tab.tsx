@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Sparkles, Save, Search, FolderTree, Package, FileText, ChevronLeft, ChevronRight, Zap, StopCircle } from "lucide-react";
+import { Loader2, Sparkles, Save, Search, FolderTree, Package, FileText, ChevronLeft, ChevronRight, Zap, StopCircle, CheckSquare } from "lucide-react";
 import { toast } from "sonner";
 import {
   adminListSeoCategories,
@@ -12,6 +12,7 @@ import {
   adminGenerateSeo,
   adminBulkCountMissing,
   adminBulkGenerateSeo,
+  adminGenerateSeoForIds,
 } from "@/lib/seo.functions";
 
 type Sub = "categories" | "products" | "pages";
@@ -220,11 +221,89 @@ function BulkGenerateBar({ kind, invalidateKeys }: { kind: "category" | "product
   );
 }
 
+// ------- Selected items generation -------
+function SelectionBar({
+  kind,
+  selected,
+  clear,
+  selectAll,
+  pageCount,
+  invalidateKeys,
+}: {
+  kind: "category" | "product";
+  selected: Set<string>;
+  clear: () => void;
+  selectAll: () => void;
+  pageCount: number;
+  invalidateKeys: string[];
+}) {
+  const qc = useQueryClient();
+  const [running, setRunning] = useState(false);
+  const [done, setDone] = useState(0);
+  const count = selected.size;
+
+  const run = async () => {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    if (!confirm(`Сгенерировать SEO для ${ids.length} выбранных? Существующие значения будут перезаписаны.`)) return;
+    setRunning(true);
+    setDone(0);
+    let ok = 0;
+    let failed = 0;
+    try {
+      for (let i = 0; i < ids.length; i += 5) {
+        const chunk = ids.slice(i, i + 5);
+        const r = await adminGenerateSeoForIds({ data: { kind, ids: chunk } });
+        ok += r.processed;
+        failed += r.failed;
+        setDone(ok + failed);
+      }
+      toast.success(`Готово: ${ok}${failed ? `, ошибок: ${failed}` : ""}`);
+      clear();
+    } catch (e) {
+      toast.error("Ошибка генерации", { description: (e as Error).message });
+    } finally {
+      setRunning(false);
+      for (const k of invalidateKeys) qc.invalidateQueries({ queryKey: [k] });
+    }
+  };
+
+  return (
+    <div className="mb-4 rounded-lg border border-border bg-card p-3 flex items-center gap-3 flex-wrap">
+      <div className="text-sm flex-1 min-w-[180px]">
+        Выбрано: <span className="font-semibold">{count}</span>
+        {running && <span className="text-muted-foreground"> · обработано {done}/{count}</span>}
+      </div>
+      <button onClick={selectAll} disabled={running || pageCount === 0} className="h-9 px-3 rounded-md border border-border text-sm hover:bg-accent disabled:opacity-50">
+        Выбрать все на странице
+      </button>
+      <button onClick={clear} disabled={running || count === 0} className="h-9 px-3 rounded-md border border-border text-sm hover:bg-accent disabled:opacity-50">
+        Снять выбор
+      </button>
+      <button
+        onClick={run}
+        disabled={running || count === 0}
+        className="inline-flex items-center gap-2 h-9 px-4 rounded-md btn-brand text-sm font-medium disabled:opacity-50"
+      >
+        {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckSquare className="h-4 w-4" />}
+        Сгенерировать выбранные
+      </button>
+    </div>
+  );
+}
+
 // ------- Categories -------
 function CategoriesSeo() {
   const qc = useQueryClient();
   const [filter, setFilter] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggle = (id: string) =>
+    setSelected((s) => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
   const { data, isLoading } = useQuery({ queryKey: ["seo-categories"], queryFn: () => adminListSeoCategories() });
 
   const saveMut = useMutation({
@@ -248,6 +327,14 @@ function CategoriesSeo() {
   return (
     <div>
       <BulkGenerateBar kind="category" invalidateKeys={["seo-categories"]} />
+      <SelectionBar
+        kind="category"
+        selected={selected}
+        clear={() => setSelected(new Set())}
+        selectAll={() => setSelected(new Set(items.slice(0, 200).map((c) => c.id)))}
+        pageCount={Math.min(200, items.length)}
+        invalidateKeys={["seo-categories"]}
+      />
       <div className="mb-4 relative">
         <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input
@@ -263,16 +350,25 @@ function CategoriesSeo() {
           const hasSeo = c.seo_title || c.seo_description;
           return (
             <div key={c.id}>
-              <button
-                onClick={() => setOpenId(isOpen ? null : c.id)}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent/50 text-left"
-              >
-                <span className="flex-1 text-sm font-medium">{c.name}</span>
-                <span className={`text-xs px-2 py-0.5 rounded ${hasSeo ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-muted text-muted-foreground"}`}>
-                  {hasSeo ? "SEO задан" : "Нет SEO"}
-                </span>
-                <span className="text-xs text-muted-foreground font-mono hidden sm:inline">/{c.slug}</span>
-              </button>
+              <div className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent/50">
+                <input
+                  type="checkbox"
+                  checked={selected.has(c.id)}
+                  onChange={() => toggle(c.id)}
+                  className="h-4 w-4 shrink-0"
+                  aria-label={`Выбрать ${c.name}`}
+                />
+                <button
+                  onClick={() => setOpenId(isOpen ? null : c.id)}
+                  className="flex-1 min-w-0 flex items-center gap-3 text-left"
+                >
+                  <span className="flex-1 text-sm font-medium">{c.name}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded ${hasSeo ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-muted text-muted-foreground"}`}>
+                    {hasSeo ? "SEO задан" : "Нет SEO"}
+                  </span>
+                  <span className="text-xs text-muted-foreground font-mono hidden sm:inline">/{c.slug}</span>
+                </button>
+              </div>
               {isOpen && (
                 <div className="px-4 py-4 bg-muted/30">
                   <SeoEditor
@@ -306,6 +402,13 @@ function ProductsSeo() {
   const [page, setPage] = useState(1);
   const [onlyMissing, setOnlyMissing] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggle = (id: string) =>
+    setSelected((s) => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
   const pageSize = 20;
 
   const { data, isLoading } = useQuery({
@@ -333,6 +436,14 @@ function ProductsSeo() {
   return (
     <div>
       <BulkGenerateBar kind="product" invalidateKeys={["seo-products"]} />
+      <SelectionBar
+        kind="product"
+        selected={selected}
+        clear={() => setSelected(new Set())}
+        selectAll={() => setSelected(new Set((data?.items ?? []).map((p) => p.id)))}
+        pageCount={(data?.items ?? []).length}
+        invalidateKeys={["seo-products"]}
+      />
       <form
         onSubmit={(e) => { e.preventDefault(); setPage(1); setSearchQ(search); }}
         className="mb-4 flex flex-wrap gap-2 items-center"
@@ -370,18 +481,27 @@ function ProductsSeo() {
               const hasSeo = p.seo_title || p.seo_description;
               return (
                 <div key={p.id}>
-                  <button
-                    onClick={() => setOpenId(isOpen ? null : p.id)}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent/50 text-left"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate">{p.name}</div>
-                      <div className="text-xs text-muted-foreground">{p.vendor ?? ""} {p.vendor_code ? `· арт. ${p.vendor_code}` : ""}</div>
-                    </div>
-                    <span className={`text-xs px-2 py-0.5 rounded shrink-0 ${hasSeo ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-muted text-muted-foreground"}`}>
-                      {hasSeo ? "SEO задан" : "Нет SEO"}
-                    </span>
-                  </button>
+                  <div className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent/50">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(p.id)}
+                      onChange={() => toggle(p.id)}
+                      className="h-4 w-4 shrink-0"
+                      aria-label={`Выбрать ${p.name}`}
+                    />
+                    <button
+                      onClick={() => setOpenId(isOpen ? null : p.id)}
+                      className="flex-1 min-w-0 flex items-center gap-3 text-left"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{p.name}</div>
+                        <div className="text-xs text-muted-foreground">{p.vendor ?? ""} {p.vendor_code ? `· арт. ${p.vendor_code}` : ""}</div>
+                      </div>
+                      <span className={`text-xs px-2 py-0.5 rounded shrink-0 ${hasSeo ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-muted text-muted-foreground"}`}>
+                        {hasSeo ? "SEO задан" : "Нет SEO"}
+                      </span>
+                    </button>
+                  </div>
                   {isOpen && (
                     <div className="px-4 py-4 bg-muted/30">
                       <SeoEditor
