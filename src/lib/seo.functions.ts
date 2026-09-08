@@ -390,3 +390,73 @@ export const adminBulkGenerateSeo = createServerFn({ method: "POST" })
       return { processed, failed, remaining: count ?? 0 };
     }
   });
+
+// Generate SEO for an explicit list of selected ids (overwrites existing values).
+export const adminGenerateSeoForIds = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      kind: z.enum(["category", "product"]),
+      ids: z.array(z.string().uuid()).min(1).max(10),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    if (data.kind === "category") {
+      const { data: items, error } = await supabaseAdmin
+        .from("categories")
+        .select("id, name, parent_yml_id")
+        .in("id", data.ids);
+      if (error) throw new Error(error.message);
+      const parentIds = Array.from(new Set((items ?? []).map((i) => i.parent_yml_id).filter(Boolean) as string[]));
+      const parents = parentIds.length
+        ? (await supabaseAdmin.from("categories").select("yml_id, name").in("yml_id", parentIds)).data ?? []
+        : [];
+      const parentMap = new Map(parents.map((p) => [p.yml_id, p.name]));
+
+      let processed = 0;
+      let failed = 0;
+      const results = await Promise.allSettled(
+        (items ?? []).map(async (c) => {
+          const prompt = await buildCategoryPrompt(c, parentMap.get(c.parent_yml_id ?? "") ?? "");
+          const seo = await generateWithAI(prompt);
+          const { error: upErr } = await supabaseAdmin
+            .from("categories")
+            .update({ seo_title: seo.title, seo_description: seo.description })
+            .eq("id", c.id);
+          if (upErr) throw new Error(upErr.message);
+        }),
+      );
+      for (const r of results) (r.status === "fulfilled" ? processed++ : failed++);
+      return { processed, failed };
+    }
+
+    const { data: items, error } = await supabaseAdmin
+      .from("products")
+      .select("id, name, vendor, vendor_code, description, params, category_yml_id")
+      .in("id", data.ids);
+    if (error) throw new Error(error.message);
+    const catIds = Array.from(new Set((items ?? []).map((i) => i.category_yml_id).filter(Boolean) as string[]));
+    const cats = catIds.length
+      ? (await supabaseAdmin.from("categories").select("yml_id, name").in("yml_id", catIds)).data ?? []
+      : [];
+    const catMap = new Map(cats.map((c) => [c.yml_id, c.name]));
+
+    let processed = 0;
+    let failed = 0;
+    const results = await Promise.allSettled(
+      (items ?? []).map(async (p) => {
+        const prompt = await buildProductPrompt(p, catMap.get(p.category_yml_id ?? "") ?? "");
+        const seo = await generateWithAI(prompt);
+        const { error: upErr } = await supabaseAdmin
+          .from("products")
+          .update({ seo_title: seo.title, seo_description: seo.description })
+          .eq("id", p.id);
+        if (upErr) throw new Error(upErr.message);
+      }),
+    );
+    for (const r of results) (r.status === "fulfilled" ? processed++ : failed++);
+    return { processed, failed };
+  });
